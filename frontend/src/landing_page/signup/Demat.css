@@ -1,0 +1,40 @@
+.rol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem; /* Add equal spacing between items */
+  margin-bottom: 3rem;
+}
+
+.col-3 {
+  flex: 1 1 220px;
+  max-width: 250px;
+  text-align: left;
+}
+
+.col-3 img {
+  width: 80px;
+  height: 80px;
+  display: block;
+  margin-bottom: 0.75rem; /* Add space below image */
+}
+
+.col-3 h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #424242;
+  margin-bottom: 0.4rem;
+}
+
+.col-3 p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2.5rem;
+  color: #222;
+}

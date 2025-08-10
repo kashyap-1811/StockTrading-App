@@ -1,0 +1,9 @@
+.pricing-text {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 576px) {
+  .pricing-text {
+    font-size: 0.75rem;
+  }
+}

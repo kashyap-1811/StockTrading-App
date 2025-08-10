@@ -1,0 +1,223 @@
+/* Keyframe Animations */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Main Container */
+.hero-container {
+  min-height: 80vh;
+  position: relative;
+  overflow: hidden;
+  padding: 0 4vw;
+}
+
+/* Hero Content */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* Image Styling - Same height as signup card */
+.hero-image-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: slideInFromLeft 0.8s ease-out;
+}
+
+.hero-image {
+  width: 100%;
+  height: 450px;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Signup Card */
+.signup-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: slideInFromBottom 0.8s ease-out;
+  position: relative;
+  z-index: 10;
+  max-width: 450px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Mobile Input Group */
+.mobile-input-group {
+  display: flex;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.mobile-input-group.focused {
+  border-color: #387ff5;
+  box-shadow: 0 0 0 3px rgba(56, 127, 245, 0.1);
+}
+
+.mobile-prefix {
+  background: #ffffff;
+  padding: 12px 16px;
+  border: none;
+  border-right: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.mobile-input {
+  border: none;
+  padding: 12px 16px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #374151;
+  flex: 1;
+  outline: none;
+}
+
+/* Buttons */
+.zerodha-btn {
+  background: #387ff5;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.social-btn {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Text Elements */
+.zerodha-label {
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.zerodha-text {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.zerodha-link {
+  color: #387ff5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-title {
+  color: #1f2937;
+}
+
+/* Brand Icon */
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  background: #387ff5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+/* Divider without line */
+.divider-no-line {
+  text-align: center;
+  margin: 24px 0;
+}
+
+.divider-no-line span {
+  color: #6b7280;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-container {
+    padding: 0 3vw;
+  }
+  
+  .signup-card {
+    max-width: 100%;
+    margin: 20px 0;
+  }
+
+  .hero-image {
+    height: 350px;
+  }
+}
+
+@media (max-width: 992px) {
+  .hero-image-container {
+    margin-bottom: 2rem;
+  }
+  
+  .hero-image {
+    height: 400px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .hero-image {
+    height: 500px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .hero-image {
+    height: 550px;
+  }
+}
