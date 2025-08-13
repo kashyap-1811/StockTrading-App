@@ -13,7 +13,7 @@ export default function Navbar() {
                 <div className="logo">
                     <Link to="/" onClick={() => setCurrentPath('/')}>
                         <img
-                            src="https://zerodha.com/static/images/logo.svg"
+                            src="./images/logo.svg"
                             alt="Zerodha logo"
                         />
                     </Link>
@@ -77,11 +77,11 @@ export default function Navbar() {
                                         <p><strong>Education</strong></p>
                                         <div className="education-wrapper">
                                             <a href="https://zerodha.com/varsity/" className="education-item">
-                                                <img src="https://zerodha.com/static/images/products/varsity.png" />
+                                                <img src="images/varsity-logo.png" />
                                                 <span>Varsity</span>
                                             </a>
                                             <a href="https://tradingqna.com/" className="education-item">
-                                                <img src="https://zerodha.com/static/images/products/tqna.png" />
+                                                <img src="images/tqna-logo.png" />
                                                 <span>Trading Q&amp;A</span>
                                             </a>
                                         </div>

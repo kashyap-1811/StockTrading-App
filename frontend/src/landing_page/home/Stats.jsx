@@ -52,12 +52,12 @@ function Stats() {
                         style={{ maxHeight: '500px', width: '100%', objectFit: 'contain' }}
                     />
 
-                    <Link
-                        to="/products"
+                    <a
+                        href="/products"
                         className="text-decoration-none d-inline-block fw-semibold mb-2 my-2 mx-4"
                     >
                         Explore Our Products<span className="ms-1">→</span>
-                    </Link>
+                    </a>
 
                     <a
                         href="https://zerodha.com/kite/"

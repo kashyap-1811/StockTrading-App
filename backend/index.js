@@ -142,9 +142,40 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// --------------------------------------------------------------------------------------------------------
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-// --------------------------------------------------------------------------------------------------------
+    // 1. Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    // 2. Check if user exists
+    const user = await UsersModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid email or password" });
+    }
+
+    // 3. Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Invalid email or password" });
+    }
+
+    // 4. Login successful
+    return res.status(200).json({
+      success: true,
+      message: "Login successful"
+    });
+  } catch (error) {
+    console.error("Login error:", error); // for logging
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong"
+    });
+  }
+});
 
 // --------------------------------------------------------------------------------------------------------
 
