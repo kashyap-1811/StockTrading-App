@@ -30,6 +30,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const bcrypt = require("bcryptjs");
 
+// jwt
+const jwt = require("jsonwebtoken");
+const verifyToken = require("./Middlewares/verifyToken.js");
+
 // --------------------------------------------------------------------------------------------------------
 // MongoDB Connection
 mongoose.connect(URI)
@@ -51,17 +55,17 @@ app.get('/', (req, res) => {
     res.send('Server is running');
 });
 
-app.get('/holdings', async (req, res) => {
+app.get('/holdings', verifyToken, async (req, res) => {
     let allHoldings = await HoldingsModel.find({});
     res.json(allHoldings);
 });
 
-app.get('/positions', async (req, res) => {
+app.get('/positions', verifyToken, async (req, res) => {
     let allPositions = await PositionsModel.find({});
     res.json(allPositions);
 });
 
-app.post('/newOrder', async (req, res) => {
+app.post('/newOrder', verifyToken, async (req, res) => {
     const { name, qty, price, mode } = req.body;
 
     // Create a new order
@@ -146,30 +150,35 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Validate required fields
     if (!email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
-    // 2. Check if user exists
     const user = await UsersModel.findOne({ email });
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
+      return res.status(400).json({ success: false, message: "Email does not Exist" });
     }
 
-    // 3. Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
+      return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
-    // 4. Login successful
+    // Create JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email }, // payload
+      process.env.JWT_SECRET, // secret key
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+    );
+
     return res.status(200).json({
       success: true,
-      message: "Login successful"
+      message: "Login successful",
+      token // send token to client
     });
+
   } catch (error) {
-    console.error("Login error:", error); // for logging
+    console.error("Login error:", error);
     return res.status(500).json({
       success: false,
       message: "Something went wrong"

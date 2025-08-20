@@ -4,16 +4,25 @@ import "./Positions.css";
 
 const Positions = () => {
   const [positions, setPositions] = useState([]);
+
+  useEffect(() => {
+    const fetchPositions = async () => {
+      const token = localStorage.getItem("token");
   
-    useEffect(() => {
-      axios.get("http://localhost:8000/positions")
-        .then(response => {
-          setPositions(response.data);
-        })
-        .catch(error => {
-          console.error("Error fetching positions:", error);
+      try {
+        const response = await axios.get("http://localhost:8000/positions", {
+          headers: {
+            Authorization: `Bearer ${token}`,  // 👈 attach JWT here
+          },
         });
-    }, []);
+        setPositions(response.data);
+      } catch (error) {
+        console.error("Error fetching positions:", error);
+      }
+    };
+
+    fetchPositions();
+  }, []);
 
   return (
     <div className="positions-full-container">

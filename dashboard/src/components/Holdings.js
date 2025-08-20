@@ -6,13 +6,22 @@ const Holdings = () => {
   const [holdings, setHoldings] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/holdings")
-      .then(response => {
+    const fetchHoldings = async () => {
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await axios.get("http://localhost:8000/holdings", {
+          headers: {
+            Authorization: `Bearer ${token}`,  // 👈 attach JWT here
+          },
+        });
         setHoldings(response.data);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Error fetching holdings:", error);
-      });
+      }
+    };
+
+    fetchHoldings();
   }, []);
 
   const totalInvestment = holdings.reduce((sum, h) => sum + h.avg * h.qty, 0);

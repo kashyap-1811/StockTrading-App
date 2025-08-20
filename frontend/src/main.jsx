@@ -10,11 +10,9 @@ import SupportPage from './landing_page/support/SupportPage'
 import NotFound from './landing_page/NotFound'
 import Navbar from './landing_page/Navbar'
 import Footer from './landing_page/Footer'
-import ScrollToTop from './ScrollToTop'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-  <ScrollToTop />
   <Navbar />
 
     <Routes>

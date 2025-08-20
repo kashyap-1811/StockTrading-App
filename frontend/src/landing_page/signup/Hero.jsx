@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import "./Hero.css"
 
 export default function Hero() {
-  const [mode, setMode] = useState("signup") // "signup" or "login"
+  const [mode, setMode] = useState("login") // "signup" or "login"
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,8 +34,17 @@ export default function Hero() {
       const data = await res.json()
 
       if (data.success) {
-        sessionStorage.setItem("flashMessage", data.message)
-        window.location.href = "http://localhost:3000/"
+         // Store JWT in localStorage
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+
+        // Optionally store user info if backend sends it
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+          console.log("Token in localStorage:", data.token);  // 👈 Check if token is there
+        }
+        window.location.href = `http://localhost:3000?token=${data.token}`;
       } else {
         setMessage(data.message)
       }
