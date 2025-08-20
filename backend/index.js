@@ -55,6 +55,10 @@ app.get('/', (req, res) => {
     res.send('Server is running');
 });
 
+app.get("/verify", verifyToken, (req, res) => {
+  res.json({ success: true, user: req.user });
+});
+
 app.get('/holdings', verifyToken, async (req, res) => {
     let allHoldings = await HoldingsModel.find({});
     res.json(allHoldings);

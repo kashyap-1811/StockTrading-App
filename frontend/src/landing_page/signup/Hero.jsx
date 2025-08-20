@@ -16,43 +16,61 @@ export default function Hero() {
   const [message, setMessage] = useState("")
   const [focusedField, setFocusedField] = useState(null)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const endpoint =
-        mode === "signup"
-          ? "http://localhost:8000/signup"
-          : "http://localhost:8000/login"
+  try {
+    const endpoint =
+      mode === "signup"
+        ? "http://localhost:8000/signup"
+        : "http://localhost:8000/login";
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
+    // Only send necessary fields
+    const payload =
+      mode === "signup"
+        ? formData
+        : { email: formData.email, password: formData.password };
 
-      const data = await res.json()
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      if (data.success) {
-         // Store JWT in localStorage
+    const data = await res.json();
+
+    if (data.success) {
+      if (mode === "signup") {
+        // ✅ After signup, just switch to login
+        setMessage("Signup successful! Please login to continue.");
+        setMode("login");
+        setFormData({
+          name: "",
+          email: "",
+          mobile: "",
+          birthday: "",
+          password: "",
+          confirmPassword: "",
+        });
+      } else {
+        // ✅ Login flow
         if (data.token) {
           localStorage.setItem("token", data.token);
         }
-
-        // Optionally store user info if backend sends it
         if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
-          console.log("Token in localStorage:", data.token);  // 👈 Check if token is there
+          console.log("Token in localStorage:", data.token);
         }
         window.location.href = `http://localhost:3000?token=${data.token}`;
-      } else {
-        setMessage(data.message)
       }
-    } catch (err) {
-      console.error(`${mode} error:`, err)
-      setMessage("Error connecting to server")
+    } else {
+      setMessage(data.message);
     }
+  } catch (err) {
+    console.error(`${mode} error:`, err);
+    setMessage("Error connecting to server");
   }
+};
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
