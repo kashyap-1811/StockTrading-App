@@ -8,7 +8,7 @@ const router = express.Router();
 
 // mongoose
 const mongoose = require('mongoose');
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 const URI = process.env.MONGO_URL;
 
 // models
