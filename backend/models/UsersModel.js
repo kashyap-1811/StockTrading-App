@@ -8,9 +8,10 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, unique: true },
     kycStatus: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
     balance: { type: Number, default: 0 },
+    points: { type: Number, default: 0 },
+    totalPointsAdded: { type: Number, default: 0 },
     holdings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Holdings' }],
-    positions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Positions' }],
-    orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Orders' }],
+    // orders removed
     isActive: { type: Boolean, default: true }
 }, {
     timestamps: true

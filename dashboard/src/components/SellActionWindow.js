@@ -1,21 +1,18 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
 import axios from "axios";
-
 import GeneralContext from "./GeneralContext";
-
 import "./BuyActionWindow.css";
 
-const BuyActionWindow = ({ uid }) => {
+const SellActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
 
-  const handleBuyClick = async () => {
+  const handleSellClick = async () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:8000/buy",
+        "http://localhost:8000/sell",
         {
           symbol: uid,
           qty: Number(stockQuantity),
@@ -26,17 +23,17 @@ const BuyActionWindow = ({ uid }) => {
         }
       );
     } catch (e) {
-      console.error("Buy failed", e);
+      console.error("Sell failed", e);
     }
-    GeneralContext.closeBuyWindow();
+    GeneralContext.closeSellWindow();
   };
 
   const handleCancelClick = () => {
-    GeneralContext.closeBuyWindow();
+    GeneralContext.closeSellWindow();
   };
 
   return (
-    <div className="container" id="buy-window" draggable="true">
+    <div className="container" id="sell-window" draggable="true">
       <div className="regular-order">
         <div className="inputs">
           <fieldset>
@@ -65,8 +62,8 @@ const BuyActionWindow = ({ uid }) => {
 
       <div className="buttons">
         <div>
-          <Link className="btn btn-blue" onClick={handleBuyClick}>
-            Buy
+          <Link className="btn btn-blue" onClick={handleSellClick}>
+            Sell
           </Link>
           <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
             Cancel
@@ -77,4 +74,6 @@ const BuyActionWindow = ({ uid }) => {
   );
 };
 
-export default BuyActionWindow;
+export default SellActionWindow;
+
+

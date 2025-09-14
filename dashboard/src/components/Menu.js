@@ -33,17 +33,7 @@ const Menu = () => {
               </p>
             </Link>
           </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/orders"
-              onClick={() => handleMenuClick(1)}
-            >
-              <p className={selectedMenu === 1 ? activeMenuClass : menuClass}>
-                Orders
-              </p>
-            </Link>
-          </li>
+          
           <li>
             <Link
               style={{ textDecoration: "none" }}
@@ -55,17 +45,7 @@ const Menu = () => {
               </p>
             </Link>
           </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/positions"
-              onClick={() => handleMenuClick(3)}
-            >
-              <p className={selectedMenu === 3 ? activeMenuClass : menuClass}>
-                Positions
-              </p>
-            </Link>
-          </li>
+          
           <li>
             <Link
               style={{ textDecoration: "none" }}
@@ -77,23 +57,15 @@ const Menu = () => {
               </p>
             </Link>
           </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/apps"
-              onClick={() => handleMenuClick(6)}
-            >
-              <p className={selectedMenu === 6 ? activeMenuClass : menuClass}>
-                Apps
-              </p>
-            </Link>
-          </li>
+          
         </ul>
         <hr />
-        <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
-        </div>
+        <Link style={{ textDecoration: "none" }} to="/profile">
+          <div className="profile" onClick={handleProfileClick}>
+            <div className="avatar">U</div>
+            <p className="username">Profile</p>
+          </div>
+        </Link>
       </div>
     </div>
   );

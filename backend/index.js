@@ -13,9 +13,9 @@ const URI = process.env.MONGO_URL;
 
 // models
 const HoldingsModel = require('./models/HoldingsModel');
-const PositionsModel = require('./models/PositionsModel');
-const OrdersModel = require('./models/OrdersModel');
+// Orders removed
 const UsersModel = require('./models/UsersModel');
+const HistoryModel = require('./models/HistoryModel');
 
 // cors
 const cors = require('cors');
@@ -60,36 +60,197 @@ app.get("/verify", verifyToken, (req, res) => {
 });
 
 app.get('/holdings', verifyToken, async (req, res) => {
-    let allHoldings = await HoldingsModel.find({});
-    res.json(allHoldings);
-});
-
-app.get('/positions', verifyToken, async (req, res) => {
-    let allPositions = await PositionsModel.find({});
-    res.json(allPositions);
-});
-
-app.post('/newOrder', verifyToken, async (req, res) => {
-    const { name, qty, price, mode } = req.body;
-
-    // Create a new order
-    const newOrder = new OrdersModel({
-        name,
-        qty,
-        price,
-        mode
-    });
-
     try {
-        await newOrder.save();
-        res.status(201).json(newOrder);
+        const userId = req.user.id;
+        const userHoldings = await HoldingsModel.find({ userId });
+        res.json(userHoldings);
     } catch (error) {
-        console.error('Error creating new order:', error); // for logging
+        console.error('Error fetching holdings:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
+// Current user profile
+app.get('/me', verifyToken, async (req, res) => {
+  try {
+    const user = await UsersModel.findById(req.user.id).select('-password').populate('holdings');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Add wallet points
+app.post('/wallet/add', verifyToken, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+    const user = await UsersModel.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.points = (user.points || 0) + numericAmount;
+    user.totalPointsAdded = (user.totalPointsAdded || 0) + numericAmount;
+    await user.save();
+    await HistoryModel.create({ userId: user._id, type: 'ADD_FUNDS', amount: numericAmount });
+    res.json({ success: true, points: user.points });
+  } catch (error) {
+    console.error('Wallet add error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Withdraw wallet points
+app.post('/wallet/withdraw', verifyToken, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+    const user = await UsersModel.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if ((user.points || 0) < numericAmount) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+    user.points = (user.points || 0) - numericAmount;
+    await user.save();
+    await HistoryModel.create({ userId: user._id, type: 'WITHDRAW', amount: numericAmount });
+    res.json({ success: true, points: user.points });
+  } catch (error) {
+    console.error('Wallet withdraw error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Place BUY: creates/updates holding and deducts points
+app.post('/buy', verifyToken, async (req, res) => {
+  try {
+    const { symbol, qty, price } = req.body;
+    const userId = req.user.id;
+
+    if (!symbol || !qty || !price || qty <= 0 || price <= 0) {
+      return res.status(400).json({ error: 'Invalid payload' });
+    }
+
+    const user = await UsersModel.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const cost = qty * price;
+    if (user.points < cost) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+
+    // upsert holding
+    let holding = await HoldingsModel.findOne({ userId, name: symbol });
+    if (!holding) {
+      holding = new HoldingsModel({
+        userId,
+        name: symbol,
+        qty,
+        avg: price,
+        price,
+        net: '0',
+        day: '0'
+      });
+    } else {
+      const totalQty = holding.qty + qty;
+      const totalCost = holding.avg * holding.qty + price * qty;
+      holding.avg = totalCost / totalQty;
+      holding.qty = totalQty;
+      holding.price = price;
+    }
+    await holding.save();
+
+    // link holding to user if new
+    if (!user.holdings.includes(holding._id)) {
+      user.holdings.push(holding._id);
+    }
+
+    // deduct points
+    user.points -= cost;
+    await user.save();
+
+    // history
+    await HistoryModel.create({ userId, type: 'BUY', amount: cost, symbol, qty, price });
+
+    res.status(201).json({ success: true, holding, points: user.points });
+  } catch (error) {
+    console.error('Buy error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Place SELL: reduces holding and adds points
+app.post('/sell', verifyToken, async (req, res) => {
+  try {
+    const { symbol, qty, price } = req.body;
+    const userId = req.user.id;
+
+    if (!symbol || !qty || !price || qty <= 0 || price <= 0) {
+      return res.status(400).json({ error: 'Invalid payload' });
+    }
+
+    const user = await UsersModel.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    let holding = await HoldingsModel.findOne({ userId, name: symbol });
+    if (!holding || holding.qty < qty) {
+      return res.status(400).json({ error: 'Insufficient holdings' });
+    }
+
+    holding.qty -= qty;
+    holding.price = price;
+    await holding.save();
+
+    // remove empty holding from user's list
+    if (holding.qty === 0) {
+      await HoldingsModel.deleteOne({ _id: holding._id });
+      user.holdings = user.holdings.filter(hId => hId.toString() !== holding._id.toString());
+    }
+
+    // add points
+    const proceeds = qty * price;
+    user.points += proceeds;
+    await user.save();
+
+    await HistoryModel.create({ userId, type: 'SELL', amount: proceeds, symbol, qty, price });
+
+    res.status(201).json({ success: true, points: user.points });
+  } catch (error) {
+    console.error('Sell error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // --------------------------------------------------------------------------------------------------------
+// Funds summary
+app.get('/funds', verifyToken, async (req, res) => {
+  try {
+    const user = await UsersModel.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const history = await HistoryModel.find({ userId: user._id }).sort({ createdAt: -1 }).limit(15);
+    res.json({ points: user.points || 0, totalPointsAdded: user.totalPointsAdded || 0, history });
+  } catch (error) {
+    console.error('Funds endpoint error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// CSV Export endpoint
+app.get('/funds/export-csv', verifyToken, async (req, res) => {
+  try {
+    // For now, just return a success message as requested
+    res.json({ message: 'CSV file generated successfully!' });
+  } catch (error) {
+    console.error('CSV export error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // signup
 app.post("/signup", async (req, res) => {
   try {
