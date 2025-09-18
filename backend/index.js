@@ -17,6 +17,9 @@ const HoldingsModel = require('./models/HoldingsModel');
 const UsersModel = require('./models/UsersModel');
 const HistoryModel = require('./models/HistoryModel');
 
+// services
+const stockService = require('./services/stockService');
+
 // cors
 const cors = require('cors');
 app.use(cors({
@@ -57,6 +60,45 @@ app.get('/', (req, res) => {
 
 app.get("/verify", verifyToken, (req, res) => {
   res.json({ success: true, user: req.user });
+});
+
+// Get top 50 companies for watchlist
+app.get('/stocks/top-companies', async (req, res) => {
+  try {
+    const topCompanies = await stockService.getTopCompanies();
+    res.json({ success: true, data: topCompanies });
+  } catch (error) {
+    console.error('Error fetching top companies:', error);
+    res.status(500).json({ error: 'Unable to fetch top companies' });
+  }
+});
+
+// Search companies by name or symbol
+app.get('/stocks/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+    
+    const searchResults = await stockService.searchCompanies(q);
+    res.json({ success: true, data: searchResults });
+  } catch (error) {
+    console.error('Error searching companies:', error);
+    res.status(500).json({ error: 'Unable to search companies' });
+  }
+});
+
+// Get current stock price for a single symbol
+app.get('/stocks/price/:symbol', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const stockData = await stockService.getStockPrice(symbol.toUpperCase());
+    res.json({ success: true, data: stockData });
+  } catch (error) {
+    console.error('Error fetching stock price:', error);
+    res.status(500).json({ error: 'Unable to fetch stock price' });
+  }
 });
 
 app.get('/holdings', verifyToken, async (req, res) => {

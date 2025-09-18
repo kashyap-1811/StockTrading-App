@@ -2,14 +2,14 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 // Apps removed
-import Funds from "./Funds";
-import Holdings from "./Holdings";
+import Funds from "./funds/Funds";
+import Holdings from "./Holdings/Holdings";
 
 // Positions removed
 import Profile from "./Profile";
 import Summary from "./Summary";
 import Trade from "./Trade";
-import WatchList from "./WatchList";
+import WatchList from "./WatchList/WatchList";
 import { GeneralContextProvider } from "./GeneralContext";
 import NotFound from "./NotFound";
 
@@ -22,13 +22,10 @@ const Dashboard = () => {
       <div className="content">
         <Routes>
           <Route exact path="/" element={<Summary />} />
-          {/* Orders removed */}
           <Route path="/holdings" element={<Holdings />} />
-          {/* Positions removed */}
           <Route path="/profile" element={<Profile />} />
           <Route path="/trade/:symbol" element={<Trade />} />
           <Route path="/funds" element={<Funds />} />
-          {/* Apps removed */}
           <Route path="/*" element={<NotFound />} />
         </Routes>
       </div>
