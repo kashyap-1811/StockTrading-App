@@ -22,6 +22,11 @@ const StockAnalytics = () => {
       const response = await axios.get(`http://localhost:8000/stocks/analytics/${stockName}`);
       
       if (response.data.success) {
+        console.log('Analytics data received:', response.data.data);
+        console.log('Price data length:', response.data.data.priceData.length);
+        if (response.data.data.priceData.length > 0) {
+          console.log('Date range:', response.data.data.priceData[0].date, 'to', response.data.data.priceData[response.data.data.priceData.length - 1].date);
+        }
         setAnalyticsData(response.data.data);
       } else {
         setError('Failed to fetch analytics data');
@@ -51,6 +56,9 @@ const StockAnalytics = () => {
 
   const drawChart = () => {
     if (!analyticsData || !analyticsData.priceData.length) return;
+    
+    // Ensure we only use 15 days of data
+    const chartData = analyticsData.priceData.slice(0, 15);
 
     const canvas = document.getElementById('priceChart');
     if (!canvas) return;
@@ -64,7 +72,7 @@ const StockAnalytics = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Find min and max prices
-    const prices = analyticsData.priceData.map(d => d.price);
+    const prices = chartData.map(d => d.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
     const priceRange = maxPrice - minPrice;
@@ -103,8 +111,8 @@ const StockAnalytics = () => {
     ctx.lineWidth = 3;
     ctx.beginPath();
 
-    analyticsData.priceData.forEach((point, index) => {
-      const x = padding + (chartWidth / (analyticsData.priceData.length - 1)) * index;
+    chartData.forEach((point, index) => {
+      const x = padding + (chartWidth / (chartData.length - 1)) * index;
       const y = canvas.height - padding - ((point.price - minPrice) / priceRange) * chartHeight;
       
       if (index === 0) {
@@ -118,8 +126,8 @@ const StockAnalytics = () => {
 
     // Draw data points
     ctx.fillStyle = analyticsData.isGain ? '#10B981' : '#EF4444';
-    analyticsData.priceData.forEach((point, index) => {
-      const x = padding + (chartWidth / (analyticsData.priceData.length - 1)) * index;
+    chartData.forEach((point, index) => {
+      const x = padding + (chartWidth / (chartData.length - 1)) * index;
       const y = canvas.height - padding - ((point.price - minPrice) / priceRange) * chartHeight;
       
       ctx.beginPath();
@@ -148,9 +156,10 @@ const StockAnalytics = () => {
     ctx.fillStyle = '#6b7280';
     ctx.font = '11px Inter, sans-serif';
     
-    analyticsData.priceData.forEach((point, index) => {
-      if (index % Math.ceil(analyticsData.priceData.length / 5) === 0) {
-        const x = padding + (chartWidth / (analyticsData.priceData.length - 1)) * index;
+    // Show x-axis labels for 15 days - show every 3rd day for better readability
+    chartData.forEach((point, index) => {
+      if (index % 3 === 0 || index === chartData.length - 1) {
+        const x = padding + (chartWidth / (chartData.length - 1)) * index;
         const date = formatDate(point.date);
         ctx.fillText(date, x, canvas.height - padding + 20);
       }
@@ -248,15 +257,6 @@ const StockAnalytics = () => {
 
       {/* Chart */}
       <div className="chart-container">
-        <div className="chart-header">
-          <h2>15-Day Price Trend</h2>
-          <div className="chart-legend">
-            <div className="legend-item">
-              <div className={`legend-color ${analyticsData.isGain ? 'gain' : 'loss'}`}></div>
-              <span>Price Movement</span>
-            </div>
-          </div>
-        </div>
         <div className="chart-wrapper">
           <canvas id="priceChart" width="800" height="400"></canvas>
         </div>
@@ -264,14 +264,14 @@ const StockAnalytics = () => {
 
       {/* Price Table */}
       <div className="price-table-container">
-        <h3>Daily Prices (Last 15 Days)</h3>
+        <h3>Daily Prices (Last 15 Days) - {analyticsData.priceData.length} days</h3>
         <div className="price-table">
           <div className="table-header">
             <span>Date</span>
             <span>Price</span>
             <span>Change</span>
           </div>
-          {analyticsData.priceData.map((day, index) => {
+          {analyticsData.priceData.slice(0, 15).map((day, index) => {
             const prevPrice = index > 0 ? analyticsData.priceData[index - 1].price : day.price;
             const change = day.price - prevPrice;
             const changePercent = prevPrice > 0 ? (change / prevPrice) * 100 : 0;

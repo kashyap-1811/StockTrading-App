@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const Menu = () => {
-  const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const location = useLocation();
 
-  const handleMenuClick = (index) => {
-    setSelectedMenu(index);
+  const handleProfileClick = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
-  const handleProfileClick = (index) => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  // Function to check if a route is active
+  const isActiveRoute = (path) => {
+    return location.pathname === path;
   };
 
   useEffect(() => {
@@ -45,9 +46,8 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/"
-              onClick={() => handleMenuClick(0)}
             >
-              <p className={selectedMenu === 0 ? activeMenuClass : menuClass}>
+              <p className={isActiveRoute("/") ? activeMenuClass : menuClass}>
                 Dashboard
               </p>
             </Link>
@@ -57,9 +57,8 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/holdings"
-              onClick={() => handleMenuClick(2)}
             >
-              <p className={selectedMenu === 2 ? activeMenuClass : menuClass}>
+              <p className={isActiveRoute("/holdings") ? activeMenuClass : menuClass}>
                 Holdings
               </p>
             </Link>
@@ -69,9 +68,8 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/funds"
-              onClick={() => handleMenuClick(4)}
             >
-              <p className={selectedMenu === 4 ? activeMenuClass : menuClass}>
+              <p className={isActiveRoute("/funds") ? activeMenuClass : menuClass}>
                 Funds
               </p>
             </Link>
@@ -80,7 +78,7 @@ const Menu = () => {
         </ul>
         <hr />
         <Link style={{ textDecoration: "none" }} to="/profile">
-          <div className="profile" onClick={handleProfileClick}>
+          <div className={`profile ${isActiveRoute("/profile") ? "active" : ""}`} onClick={handleProfileClick}>
             <div className="avatar">
               {user?.profilePicture ? (
                 <img 
@@ -94,7 +92,7 @@ const Menu = () => {
                 </div>
               )}
             </div>
-            <p className="username">{user?.name || 'Profile'}</p>
+            <p className={`username ${isActiveRoute("/profile") ? "active" : ""}`}>{user?.name || 'Profile'}</p>
           </div>
         </Link>
       </div>

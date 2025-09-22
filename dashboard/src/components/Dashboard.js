@@ -11,6 +11,7 @@ import Profile from "./Profile/Profile";
 import Trade from "./Trade";
 import WatchList from "./WatchList/WatchList";
 import { GeneralContextProvider } from "../contexts/GeneralContext";
+import Summary from "./Summary";
 import NotFound from "./NotFound";
 
 const Dashboard = () => {
@@ -21,7 +22,7 @@ const Dashboard = () => {
       </GeneralContextProvider>
       <div className="content">
         <Routes>
-          <Route path="/" element={<WatchList />} />
+          <Route path="/" element={<Summary />} />
           <Route path="/holdings" element={<Holdings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/trade/:symbol" element={<Trade />} />

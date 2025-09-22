@@ -40,7 +40,7 @@ const ErrorPage = ({
     if (errorType === '404') {
       return (
         <div className="illustration-404">
-          <div className="green-circle">
+          <div className="neutral-circle">
             <div className="sad-envelope">
               <div className="envelope-body">📧</div>
               <div className="sad-face">:(</div>

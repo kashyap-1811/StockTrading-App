@@ -343,12 +343,21 @@ class StockService {
                 const timestamps = result.timestamp;
                 const quote = result.indicators.quote[0];
                 
-                // Process 15 days data
-                const priceData = timestamps.map((timestamp, index) => ({
+                // Process 15 days data - ensure exactly 15 days
+                const allPriceData = timestamps.map((timestamp, index) => ({
                     date: new Date(timestamp * 1000).toISOString().split('T')[0],
                     timestamp: timestamp,
                     price: quote.close[index]
                 })).filter(item => item.price !== null);
+                
+                // Take exactly the last 15 days
+                const priceData = allPriceData.slice(-15);
+                
+                // Debug: Log the data range
+                console.log(`Stock ${symbol}: Got ${allPriceData.length} days, using last 15 days`);
+                if (priceData.length > 0) {
+                    console.log(`Date range: ${priceData[0].date} to ${priceData[priceData.length - 1].date}`);
+                }
 
                 // Calculate gain/loss
                 const firstPrice = priceData[0]?.price || 0;
@@ -380,6 +389,7 @@ class StockService {
         const basePrice = Math.random() * 500 + 50;
         const priceData = [];
 
+        // Generate exactly 15 days of data
         for (let i = 14; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
@@ -392,6 +402,12 @@ class StockService {
                 timestamp: Math.floor(date.getTime() / 1000),
                 price: price
             });
+        }
+        
+        // Debug: Log mock data range
+        console.log(`Mock data for ${symbol}: ${priceData.length} days`);
+        if (priceData.length > 0) {
+            console.log(`Mock date range: ${priceData[0].date} to ${priceData[priceData.length - 1].date}`);
         }
 
         const firstPrice = priceData[0].price;

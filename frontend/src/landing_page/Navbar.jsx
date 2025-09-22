@@ -37,9 +37,11 @@ export default function Navbar() {
                                 {/* Top Section */}
                                 <div className="mega-row">
                                     <div className="mega-column">
+                                    <a href="http://localhost:3000">
                                         <img src="images/kite-logo.svg" alt="Kite" />
                                         <div>Kite</div>
                                         <span>Trading platform</span>
+                                    </a>
                                     </div>
                                     <div className="mega-column">
                                         <img src="images/console-logo.svg" alt="Console" />
