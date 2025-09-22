@@ -45,7 +45,7 @@ const SellModal = ({
     
     try {
       const token = localStorage.getItem("token");
-      const currentPrice = selectedHolding.price;
+      const currentPrice = selectedHolding.currentPrice || selectedHolding.price;
       const proceeds = qty * currentPrice;
       
       await axios.post(
@@ -84,7 +84,8 @@ const SellModal = ({
     }
   };
 
-  const totalSaleValue = qty * selectedHolding.price;
+  const currentPrice = selectedHolding.currentPrice || selectedHolding.price;
+  const totalSaleValue = qty * currentPrice;
   const canSell = qty && qty > 0 && qty <= selectedHolding.qty;
 
   return (
@@ -100,7 +101,7 @@ const SellModal = ({
         <div className="stock-info-section">
           <div className="info-row">
             <span className="info-label">Current Price:</span>
-            <span className="info-value price">₹{selectedHolding.price.toFixed(2)}</span>
+            <span className="info-value price">₹{currentPrice.toFixed(2)}</span>
           </div>
           <div className="info-row">
             <span className="info-label">You Own:</span>
@@ -134,7 +135,7 @@ const SellModal = ({
             </div>
             <div className="summary-row">
               <span>Price per share:</span>
-              <span>₹{selectedHolding.price.toFixed(2)}</span>
+              <span>₹{currentPrice.toFixed(2)}</span>
             </div>
             <div className="summary-row total">
               <span>Total Sale Value:</span>

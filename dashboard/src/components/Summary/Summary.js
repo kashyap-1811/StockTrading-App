@@ -7,7 +7,7 @@ import {
   Legend,
 } from 'chart.js';
 import axios from 'axios';
-import { useStockContext } from '../contexts/StockContext';
+import { useStockContext } from '../../contexts/StockContext';
 import './Summary.css';
 
 // Register Chart.js components

@@ -214,10 +214,11 @@ const HoldingsTable = ({ holdings, onSellClick, isLoading }) => (
 
 // Separate component for each holding row
 const HoldingRow = ({ holding, onSellClick, isLoading }) => {
-  // Use current price from StockContext if available, otherwise use stored price
-  const currentPrice = holding.currentPrice || holding.price;
-  const profitLoss = holding.profitLoss || (currentPrice * holding.qty - holding.avg * holding.qty);
-  const profitLossPercentage = holding.profitLossPercentage || (holding.avg > 0 ? ((profitLoss / (holding.avg * holding.qty)) * 100) : 0);
+  // Use current price ONLY from StockContext to ensure consistency
+  const currentPrice = holding.currentPrice;
+  // Calculate profit/loss only if current price is available from StockContext
+  const profitLoss = currentPrice ? (currentPrice * holding.qty - holding.avg * holding.qty) : 0;
+  const profitLossPercentage = currentPrice && holding.avg > 0 ? ((profitLoss / (holding.avg * holding.qty)) * 100) : 0;
 
   return (
     <tr>
@@ -229,22 +230,26 @@ const HoldingRow = ({ holding, onSellClick, isLoading }) => {
       </td>
       <td>{holding.qty}</td>
       <td>₹{holding.avg.toFixed(2)}</td>
-      <td>₹{holding.price.toFixed(2)}</td>
+      <td>₹{(holding.avg * holding.qty).toFixed(2)}</td>
       <td>
         {isLoading ? (
           <span style={{ color: '#999', fontSize: '12px' }}>Loading...</span>
-        ) : (
+        ) : currentPrice ? (
           `₹${currentPrice.toFixed(2)}`
+        ) : (
+          <span style={{ color: '#999', fontSize: '12px' }}>N/A</span>
         )}
       </td>
-      <td className={isLoading ? "" : (profitLoss >= 0 ? "profit" : "loss")}>
+      <td className={isLoading ? "" : (currentPrice && profitLoss >= 0 ? "profit" : currentPrice && profitLoss < 0 ? "loss" : "")}>
         {isLoading ? (
           <span style={{ color: '#999', fontSize: '12px' }}>Loading...</span>
-        ) : (
+        ) : currentPrice ? (
           <>
             <div>₹{profitLoss >= 0 ? '+' : ''}{profitLoss.toFixed(2)}</div>
             <div style={{ fontSize: '12px' }}>({profitLoss >= 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)</div>
           </>
+        ) : (
+          <span style={{ color: '#999', fontSize: '12px' }}>N/A</span>
         )}
       </td>
       <td>

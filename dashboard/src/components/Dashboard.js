@@ -8,27 +8,30 @@ import StockAnalytics from "./StockAnalytics/StockAnalytics";
 
 // Positions removed
 import Profile from "./Profile/Profile";
-import Trade from "./Trade";
 import WatchList from "./WatchList/WatchList";
-import { GeneralContextProvider } from "../contexts/GeneralContext";
-import Summary from "./Summary";
-import NotFound from "./NotFound";
+import Summary from "./Summary/Summary";
+import ErrorPage from "./Error/Error";
 
 const Dashboard = () => {
   return (
     <div className="dashboard-container">
-      <GeneralContextProvider>
-        <WatchList />
-      </GeneralContextProvider>
+      <WatchList />
       <div className="content">
         <Routes>
           <Route path="/" element={<Summary />} />
           <Route path="/holdings" element={<Holdings />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/trade/:symbol" element={<Trade />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/stock/:stockName" element={<StockAnalytics />} />
-          <Route path="/*" element={<NotFound />} />
+          <Route path="/*" element={
+            <ErrorPage 
+              type="404"
+              title="So Sorry!"
+              message="The page you are looking for cannot be found"
+              showHome={true}
+              showRetry={false}
+            />
+          } />
         </Routes>
       </div>
     </div>
