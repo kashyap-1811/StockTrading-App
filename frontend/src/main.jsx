@@ -10,6 +10,10 @@ import SupportPage from './landing_page/support/SupportPage'
 import NotFound from './landing_page/NotFound'
 import Navbar from './landing_page/Navbar'
 import Footer from './landing_page/Footer'
+import AuthSuccess from './pages/AuthSuccess'
+import AuthError from './pages/AuthError'
+import Dashboard from './pages/Dashboard'
+import ErrorPage from './pages/ErrorPage'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
@@ -22,7 +26,10 @@ createRoot(document.getElementById('root')).render(
       <Route path="/products" element={<ProductPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/support" element={<SupportPage />} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="/auth/success" element={<AuthSuccess />} />
+      <Route path="/auth/error" element={<AuthError />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/*" element={<ErrorPage />} />
     </Routes>
 
     <Footer />

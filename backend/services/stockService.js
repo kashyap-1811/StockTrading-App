@@ -273,6 +273,92 @@ class StockService {
         const company = this.get100IndianCompanies().find(c => c.symbol === symbol);
         return company ? company.name : this.cleanSymbolForDisplay(symbol);
     }
+
+    // Get last 15 days price data for a stock
+    async getLast15DaysData(symbol) {
+        try {
+            const yahooSymbol = symbol.includes('.NS') ? symbol : `${symbol}.NS`;
+            const response = await axios.get(`${this.yahooBaseUrl}/${yahooSymbol}`, {
+                params: {
+                    interval: '1d',
+                    range: '15d'
+                },
+                timeout: 10000
+            });
+
+            if (response.data && response.data.chart && response.data.chart.result) {
+                const result = response.data.chart.result[0];
+                const meta = result.meta;
+                const timestamps = result.timestamp;
+                const quote = result.indicators.quote[0];
+                
+                // Process 15 days data
+                const priceData = timestamps.map((timestamp, index) => ({
+                    date: new Date(timestamp * 1000).toISOString().split('T')[0],
+                    timestamp: timestamp,
+                    price: quote.close[index]
+                })).filter(item => item.price !== null);
+
+                // Calculate gain/loss
+                const firstPrice = priceData[0]?.price || 0;
+                const lastPrice = meta.regularMarketPrice;
+                const gainLoss = lastPrice - firstPrice;
+                const gainLossPercent = firstPrice > 0 ? (gainLoss / firstPrice) * 100 : 0;
+
+                return {
+                    symbol: symbol,
+                    name: this.getCompanyName(symbol),
+                    currentPrice: meta.regularMarketPrice,
+                    firstPrice: firstPrice,
+                    gainLoss: gainLoss,
+                    gainLossPercent: gainLossPercent,
+                    priceData: priceData,
+                    isGain: gainLoss >= 0
+                };
+            }
+        } catch (error) {
+            console.error(`Error fetching 15-day data for ${symbol}:`, error.message);
+        }
+
+        // Fallback to mock data
+        return this.getMock15DaysData(symbol);
+    }
+
+    // Mock 15 days data for fallback
+    getMock15DaysData(symbol) {
+        const basePrice = Math.random() * 500 + 50;
+        const priceData = [];
+
+        for (let i = 14; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            
+            const priceVariation = (Math.random() - 0.5) * 0.1; // ±5% variation
+            const price = basePrice * (1 + priceVariation);
+            
+            priceData.push({
+                date: date.toISOString().split('T')[0],
+                timestamp: Math.floor(date.getTime() / 1000),
+                price: price
+            });
+        }
+
+        const firstPrice = priceData[0].price;
+        const lastPrice = priceData[priceData.length - 1].price;
+        const gainLoss = lastPrice - firstPrice;
+        const gainLossPercent = (gainLoss / firstPrice) * 100;
+
+        return {
+            symbol: symbol,
+            name: this.getCompanyName(symbol),
+            currentPrice: lastPrice,
+            firstPrice: firstPrice,
+            gainLoss: gainLoss,
+            gainLossPercent: gainLossPercent,
+            priceData: priceData,
+            isGain: gainLoss >= 0
+        };
+    }
 }
 
 module.exports = new StockService();

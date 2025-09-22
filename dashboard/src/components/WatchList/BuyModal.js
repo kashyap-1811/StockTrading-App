@@ -9,8 +9,8 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
 
   // Use current stock price (not editable)
   const currentPrice = stock.price;
-  const totalCost = quantity * currentPrice;
-  const canAfford = walletPoints >= totalCost;
+  const totalCost = (quantity || 0) * currentPrice;
+  const canAfford = walletPoints >= totalCost && quantity > 0;
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
@@ -20,12 +20,25 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
   };
 
   const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value) || 1;
-    setQuantity(Math.max(1, value));
+    const value = e.target.value;
+    // Allow empty string for typing, but convert to number for validation
+    if (value === '') {
+      setQuantity('');
+    } else {
+      const numValue = parseInt(value);
+      if (!isNaN(numValue) && numValue >= 0) {
+        setQuantity(numValue);
+      }
+    }
     setMessage("");
   };
 
   const placeBuyOrder = async () => {
+    if (!quantity || quantity <= 0) {
+      setMessage("Please enter a valid quantity");
+      return;
+    }
+    
     if (!canAfford) {
       setMessage("Insufficient points");
       return;
@@ -147,7 +160,7 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
           <button 
             className="btn btn-primary"
             onClick={placeBuyOrder} 
-            disabled={loading || !canAfford || quantity <= 0}
+            disabled={loading || !canAfford || !quantity || quantity <= 0}
           >
             {loading ? 'Processing...' : `Buy ${quantity} Share${quantity > 1 ? 's' : ''}`}
           </button>

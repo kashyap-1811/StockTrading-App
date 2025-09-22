@@ -217,9 +217,10 @@
 }
 
 .stock-name {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 14px !important;
+  color: #000000 !important;
   margin: 0;
+  font-weight: normal !important;
 }
 
 .actions {
@@ -568,8 +569,8 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
 .empty-icon {
   font-size: 48px;
   margin-bottom: 16px;
 }
+

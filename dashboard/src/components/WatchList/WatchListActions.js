@@ -5,12 +5,10 @@ import GeneralContext from "../../contexts/GeneralContext";
 import BuyModal from './BuyModal';
 
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import Tooltip from "@mui/material/Tooltip";
 import Grow from "@mui/material/Grow";
 
 const WatchListActions = ({ stock, uid, companyName }) => {
-  const generalContext = useContext(GeneralContext);
   const navigate = useNavigate();
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [walletPoints, setWalletPoints] = useState(0);
@@ -43,7 +41,7 @@ const WatchListActions = ({ stock, uid, companyName }) => {
   };
 
   const handleAnalyticsClick = () => {
-    navigate(`/analytics/${uid}`);
+    navigate(`/stock/${uid}`);
   };
 
   return (
@@ -69,17 +67,6 @@ const WatchListActions = ({ stock, uid, companyName }) => {
           >
             <button className="action-btn" onClick={handleAnalyticsClick}>
               <BarChartOutlined className="icon" />
-            </button>
-          </Tooltip>
-          
-          <Tooltip 
-            title="More" 
-            placement="top" 
-            arrow 
-            TransitionComponent={Grow}
-          >
-            <button className="action-btn">
-              <MoreHoriz className="icon" />
             </button>
           </Tooltip>
         </span>

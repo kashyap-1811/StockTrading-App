@@ -76,6 +76,11 @@ const handleSubmit = async (e) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleGoogleLogin = () => {
+    // Redirect to backend Google OAuth endpoint
+    window.location.href = 'http://localhost:8000/auth/google';
+  };
+
   // Floating particles
   const particles = []
   for (let i = 0; i < 15; i++) {
@@ -170,14 +175,11 @@ const handleSubmit = async (e) => {
 
               {/* Social Login Buttons */}
               <div className="row g-2 mb-4">
-                <div className="col-6">
-                  <button className="social-btn">
-                    <Github size={16} />
-                    GitHub
-                  </button>
-                </div>
-                <div className="col-6">
-                  <button className="social-btn">
+                <div>
+                  <button 
+                    className="social-btn"
+                    onClick={handleGoogleLogin}
+                  >
                     {/* Google icon */}
                     <svg
                       width="16"

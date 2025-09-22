@@ -20,12 +20,32 @@ const HistoryModel = require('./models/HistoryModel');
 // services
 const stockService = require('./services/stockService');
 
+// Passport OAuth
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
+
 // cors
 const cors = require('cors');
 app.use(cors({
   origin: ["http://localhost:5173", "http://localhost:3000"],
   credentials: true
 }));
+
+// Session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set to true in production with HTTPS
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Passport configuration
+app.use(passport.initialize());
+app.use(passport.session());
 
 // body-parser
 const bodyParser = require('body-parser');
@@ -45,6 +65,118 @@ mongoose.connect(URI)
 }).catch(err => {
     console.error('MongoDB connection error:', err);
 });
+
+// Passport Google OAuth Strategy
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:8000/auth/google/callback"
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+        console.log('Google OAuth profile received:', profile);
+        const { id: googleId, emails, displayName, photos } = profile;
+        const email = emails[0].value;
+        const name = displayName;
+        const profilePicture = photos[0]?.value;
+
+        console.log('Processing user:', { email, name, googleId });
+
+        // Check if user exists
+        let user = await UsersModel.findOne({ email });
+        
+        if (user) {
+            console.log('Existing user found:', user.email);
+            // Update existing user with Google ID if not present
+            if (!user.googleId) {
+                user.googleId = googleId;
+                user.profilePicture = profilePicture;
+                await user.save();
+                console.log('Updated existing user with Google ID');
+            }
+            return done(null, user);
+        } else {
+            console.log('Creating new user');
+            // Create new user
+            user = new UsersModel({
+                name,
+                email,
+                googleId,
+                profilePicture,
+                kycStatus: 'pending',
+                points: 0,
+                totalPointsAdded: 0
+            });
+            await user.save();
+            console.log('New user created:', user.email);
+            return done(null, user);
+        }
+    } catch (error) {
+        return done(error, null);
+    }
+  }));
+} else {
+  console.log('Google OAuth not configured - skipping Google strategy setup');
+}
+
+// Passport serialization
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await UsersModel.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error, null);
+    }
+});
+
+// --------------------------------------------------------------------------------------------------------
+// Google OAuth Routes
+app.get('/auth/google', (req, res) => {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.' 
+    });
+  }
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })(req, res);
+});
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: 'http://localhost:3000/auth/error?message=Authentication failed' }),
+  async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.redirect('http://localhost:3000/auth/error?message=User not found');
+      }
+
+      // Generate JWT token (same as regular login)
+      const token = jwt.sign(
+        { id: req.user._id, email: req.user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+      );
+
+      // Redirect to frontend with token
+      const frontendUrl = `http://localhost:3000/auth/success?token=${token}&user=${encodeURIComponent(JSON.stringify({
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        profilePicture: req.user.profilePicture
+      }))}`;
+      
+      res.redirect(frontendUrl);
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      res.redirect('http://localhost:3000/auth/error?message=Authentication failed');
+    }
+  }
+);
 
 // --------------------------------------------------------------------------------------------------------
 // server start
@@ -98,6 +230,18 @@ app.get('/stocks/price/:symbol', async (req, res) => {
   } catch (error) {
     console.error('Error fetching stock price:', error);
     res.status(500).json({ error: 'Unable to fetch stock price' });
+  }
+});
+
+// Get last 15 days data for analytics
+app.get('/stocks/analytics/:symbol', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const analyticsData = await stockService.getLast15DaysData(symbol.toUpperCase());
+    res.json({ success: true, data: analyticsData });
+  } catch (error) {
+    console.error('Error fetching analytics data:', error);
+    res.status(500).json({ error: 'Unable to fetch analytics data' });
   }
 });
 
@@ -284,8 +428,125 @@ app.get('/funds', verifyToken, async (req, res) => {
 // CSV Export endpoint
 app.get('/funds/export-csv', verifyToken, async (req, res) => {
   try {
-    // For now, just return a success message as requested
-    res.json({ message: 'CSV file generated successfully!' });
+    const userId = req.user.id;
+    const user = await UsersModel.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get all transaction history for the user
+    const history = await HistoryModel.find({ userId }).sort({ createdAt: -1 });
+    
+    // Group transactions by month
+    const monthlyData = {};
+    history.forEach(transaction => {
+      const date = new Date(transaction.createdAt);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long' });
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          monthName,
+          transactions: []
+        };
+      }
+      
+      // Format date and time properly
+      const formattedDate = date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      
+      const formattedTime = date.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      
+      monthlyData[monthKey].transactions.push({
+        date: formattedDate,
+        time: formattedTime,
+        type: transaction.type,
+        symbol: transaction.symbol || '-',
+        qty: transaction.qty || '-',
+        price: transaction.price ? `₹${transaction.price.toFixed(2)}` : '-',
+        amount: `₹${transaction.amount.toFixed(2)}`
+      });
+    });
+
+    // Generate CSV content
+    let csvContent = '';
+    
+    // Add header
+    csvContent += `Funds Transfer History for ${user.name}\n`;
+    csvContent += `Generated on: ${new Date().toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric'
+    })}\n\n`;
+    
+    // Add monthly sections
+    const sortedMonths = Object.keys(monthlyData).sort().reverse();
+    
+    sortedMonths.forEach(monthKey => {
+      const monthData = monthlyData[monthKey];
+      csvContent += `=== ${monthData.monthName} ===\n`;
+      csvContent += 'Date,Time,Transaction Type,Symbol,Quantity,Price,Amount\n';
+      
+      monthData.transactions.forEach(transaction => {
+        csvContent += `"${transaction.date}","${transaction.time}","${transaction.type}","${transaction.symbol}","${transaction.qty}","${transaction.price}","${transaction.amount}"\n`;
+      });
+      
+      csvContent += '\n';
+    });
+    
+    // Calculate summary statistics
+    const typeSummary = {};
+    let totalAdded = 0;
+    let totalWithdrawn = 0;
+    let totalBuyAmount = 0;
+    let totalSellAmount = 0;
+    
+    history.forEach(transaction => {
+      typeSummary[transaction.type] = (typeSummary[transaction.type] || 0) + 1;
+      
+      if (transaction.type === 'ADD_FUNDS') {
+        totalAdded += transaction.amount;
+      } else if (transaction.type === 'WITHDRAW') {
+        totalWithdrawn += transaction.amount;
+      } else if (transaction.type === 'BUY') {
+        totalBuyAmount += transaction.amount;
+      } else if (transaction.type === 'SELL') {
+        totalSellAmount += transaction.amount;
+      }
+    });
+    
+    // Add comprehensive summary
+    csvContent += '=== SUMMARY ===\n';
+    csvContent += `Total Transactions: ${history.length}\n`;
+    csvContent += `Current Balance: ₹${(user.points || 0).toFixed(2)}\n\n`;
+    
+    csvContent += '=== FINANCIAL SUMMARY ===\n';
+    csvContent += `Total Amount Added: ₹${totalAdded.toFixed(2)}\n`;
+    csvContent += `Total Amount Withdrawn: ₹${totalWithdrawn.toFixed(2)}\n`;
+    csvContent += `Total Buy Amount: ₹${totalBuyAmount.toFixed(2)}\n`;
+    csvContent += `Total Sell Amount: ₹${totalSellAmount.toFixed(2)}\n`;
+    csvContent += `Net Cash Flow: ₹${(totalAdded - totalWithdrawn).toFixed(2)}\n\n`;
+    
+    csvContent += '=== TRANSACTION BREAKDOWN ===\n';
+    Object.entries(typeSummary).forEach(([type, count]) => {
+      csvContent += `${type}: ${count} transactions\n`;
+    });
+    
+    // Set headers for file download
+    const filename = `${user.name.replace(/\s+/g, '-').toLowerCase()}-funds.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csvContent);
+    
   } catch (error) {
     console.error('CSV export error:', error);
     res.status(500).json({ error: 'Internal server error' });

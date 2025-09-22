@@ -28,7 +28,7 @@ const Trade = () => {
   const isFromSell = searchParams.get("mode") === "sell"; // Check if coming from sell
 
   const cost = Number(qty) * Number(price);
-  const canSubmit = qty > 0 && price > 0 && !loading;
+  const canSubmit = qty && qty > 0 && price > 0 && !loading;
 
   useEffect(() => {
     const loadUser = async () => {
@@ -148,7 +148,17 @@ const Trade = () => {
                 type="number" 
                 min={1} 
                 value={qty || ''} 
-                onChange={e => setQty(Math.max(1, Number(e.target.value) || 1))} 
+                onChange={e => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setQty('');
+                  } else {
+                    const numValue = Number(value);
+                    if (!isNaN(numValue) && numValue >= 0) {
+                      setQty(numValue);
+                    }
+                  }
+                }} 
                 style={{ padding: 8, border: "1px solid #e5e7eb", borderRadius: 8, width: 160 }} 
               />
             </div>

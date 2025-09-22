@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 // Apps removed
 import Funds from "./funds/Funds";
 import Holdings from "./Holdings/Holdings";
+import StockAnalytics from "./StockAnalytics/StockAnalytics";
 
 // Positions removed
 import Profile from "./Profile/Profile";
@@ -24,6 +25,7 @@ const Dashboard = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/trade/:symbol" element={<Trade />} />
           <Route path="/funds" element={<Funds />} />
+          <Route path="/stock/:stockName" element={<StockAnalytics />} />
           <Route path="/*" element={<NotFound />} />
         </Routes>
       </div>

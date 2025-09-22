@@ -10,7 +10,7 @@ const Holdings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [walletPoints, setWalletPoints] = useState(0);
-  const { getCompanyData, companies } = useStockContext();
+  const { getCompanyData, companies, loading: companiesLoading } = useStockContext();
 
   useEffect(() => {
     fetchHoldings();
@@ -40,41 +40,47 @@ const Holdings = () => {
     }
   };
 
-  const updateHoldingsWithCurrentPrices = useCallback(() => {
-    const updatedHoldings = holdings.map(holding => {
-      // Get current company data from StockContext
-      const companyData = getCompanyData(holding.symbol);
-      
-      if (companyData) {
-        const currentPrice = companyData.price;
-        const totalInvested = holding.qty * holding.avg;
-        const currentValue = holding.qty * currentPrice;
-        const profitLoss = currentValue - totalInvested;
-        const profitLossPercentage = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
-        
-        return {
-          ...holding,
-          currentPrice: currentPrice,
-          totalInvested: totalInvested,
-          currentValue: currentValue,
-          profitLoss: profitLoss,
-          profitLossPercentage: profitLossPercentage
-        };
-      }
-      
-      // If no current data available, return holding as is
-      return holding;
-    });
-    
-    setHoldings(updatedHoldings);
-  }, [holdings, getCompanyData]);
-
   // Update holdings with current prices when companies data changes
   useEffect(() => {
     if (holdings.length > 0 && companies.length > 0) {
-      updateHoldingsWithCurrentPrices();
+      const updatedHoldings = holdings.map(holding => {
+        // Get current company data from StockContext
+        const companyData = getCompanyData(holding.symbol);
+        
+        if (companyData) {
+          const currentPrice = companyData.price;
+          const totalInvested = holding.qty * holding.avg;
+          const currentValue = holding.qty * currentPrice;
+          const profitLoss = currentValue - totalInvested;
+          const profitLossPercentage = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
+          
+          return {
+            ...holding,
+            currentPrice: currentPrice,
+            totalInvested: totalInvested,
+            currentValue: currentValue,
+            profitLoss: profitLoss,
+            profitLossPercentage: profitLossPercentage
+          };
+        }
+        
+        // If no current data available, return holding as is
+        return holding;
+      });
+      
+      // Only update if there are actual changes to prevent unnecessary re-renders
+      const hasChanges = updatedHoldings.some((updated, index) => {
+        const original = holdings[index];
+        return updated.currentPrice !== original.currentPrice ||
+               updated.profitLoss !== original.profitLoss ||
+               updated.profitLossPercentage !== original.profitLossPercentage;
+      });
+      
+      if (hasChanges) {
+        setHoldings(updatedHoldings);
+      }
     }
-  }, [companies, holdings.length, updateHoldingsWithCurrentPrices]); // Add the callback dependency
+  }, [companies, getCompanyData]); // Only depend on companies and getCompanyData
 
   const loadWallet = async () => {
     try {
@@ -104,10 +110,11 @@ const Holdings = () => {
   };
 
   // Calculate totals using the updated holdings with current prices from StockContext
-  const totalInvestment = holdings.reduce((sum, h) => sum + (h.totalInvested || h.avg * h.qty), 0);
-  const currentValue = holdings.reduce((sum, h) => sum + (h.currentValue || h.price * h.qty), 0);
-  const pnl = holdings.reduce((sum, h) => sum + (h.profitLoss || 0), 0);
-  const pnlPercent = totalInvestment > 0 ? ((pnl / totalInvestment) * 100).toFixed(2) : '0.00';
+  // Only calculate when companies data is loaded
+  const totalInvestment = companiesLoading ? 0 : holdings.reduce((sum, h) => sum + (h.totalInvested || h.avg * h.qty), 0);
+  const currentValue = companiesLoading ? 0 : holdings.reduce((sum, h) => sum + (h.currentValue || h.price * h.qty), 0);
+  const pnl = companiesLoading ? 0 : holdings.reduce((sum, h) => sum + (h.profitLoss || 0), 0);
+  const pnlPercent = companiesLoading ? '0.00' : (totalInvestment > 0 ? ((pnl / totalInvestment) * 100).toFixed(2) : '0.00');
 
   return (
     <>
@@ -120,11 +127,13 @@ const Holdings = () => {
         currentValue={currentValue}
         pnl={pnl}
         pnlPercent={pnlPercent}
+        isLoading={companiesLoading}
       />
 
       <HoldingsTable 
         holdings={holdings}
         onSellClick={handleSellClick}
+        isLoading={companiesLoading}
       />
 
       <SellModal
@@ -139,20 +148,35 @@ const Holdings = () => {
 };
 
 // Separate component for summary cards
-const SummaryCards = ({ totalInvestment, currentValue, pnl, pnlPercent }) => (
+const SummaryCards = ({ totalInvestment, currentValue, pnl, pnlPercent, isLoading }) => (
   <div className="summary-row">
     <div className="summary-card">
-      <h5>₹{totalInvestment.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</h5>
+      <h5>
+        {isLoading ? (
+          <span style={{ color: '#999', fontSize: '14px' }}>Loading...</span>
+        ) : (
+          `₹${totalInvestment.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+        )}
+      </h5>
       <p>Total Investment</p>
     </div>
     <div className="summary-card">
-      <h5>₹{currentValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</h5>
+      <h5>
+        {isLoading ? (
+          <span style={{ color: '#999', fontSize: '14px' }}>Loading...</span>
+        ) : (
+          `₹${currentValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+        )}
+      </h5>
       <p>Current Value</p>
     </div>
     <div className="summary-card">
-      <h5 className={pnl >= 0 ? "profit" : "loss"}>
-        ₹{pnl.toFixed(2)} ({pnl >= 0 ? "+" : ""}
-        {pnlPercent}%)
+      <h5 className={isLoading ? "" : (pnl >= 0 ? "profit" : "loss")}>
+        {isLoading ? (
+          <span style={{ color: '#999', fontSize: '14px' }}>Loading...</span>
+        ) : (
+          `₹${pnl.toFixed(2)} (${pnl >= 0 ? "+" : ""}${pnlPercent}%)`
+        )}
       </h5>
       <p>P&L</p>
     </div>
@@ -160,7 +184,7 @@ const SummaryCards = ({ totalInvestment, currentValue, pnl, pnlPercent }) => (
 );
 
 // Separate component for holdings table
-const HoldingsTable = ({ holdings, onSellClick }) => (
+const HoldingsTable = ({ holdings, onSellClick, isLoading }) => (
   <div className="order-table">
     <table>
       <thead>
@@ -180,6 +204,7 @@ const HoldingsTable = ({ holdings, onSellClick }) => (
             key={index}
             holding={item}
             onSellClick={onSellClick}
+            isLoading={isLoading}
           />
         ))}
       </tbody>
@@ -188,7 +213,7 @@ const HoldingsTable = ({ holdings, onSellClick }) => (
 );
 
 // Separate component for each holding row
-const HoldingRow = ({ holding, onSellClick }) => {
+const HoldingRow = ({ holding, onSellClick, isLoading }) => {
   // Use current price from StockContext if available, otherwise use stored price
   const currentPrice = holding.currentPrice || holding.price;
   const profitLoss = holding.profitLoss || (currentPrice * holding.qty - holding.avg * holding.qty);
@@ -205,10 +230,22 @@ const HoldingRow = ({ holding, onSellClick }) => {
       <td>{holding.qty}</td>
       <td>₹{holding.avg.toFixed(2)}</td>
       <td>₹{holding.price.toFixed(2)}</td>
-      <td>₹{currentPrice.toFixed(2)}</td>
-      <td className={profitLoss >= 0 ? "profit" : "loss"}>
-        <div>₹{profitLoss >= 0 ? '+' : ''}{profitLoss.toFixed(2)}</div>
-        <div style={{ fontSize: '12px' }}>({profitLoss >= 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)</div>
+      <td>
+        {isLoading ? (
+          <span style={{ color: '#999', fontSize: '12px' }}>Loading...</span>
+        ) : (
+          `₹${currentPrice.toFixed(2)}`
+        )}
+      </td>
+      <td className={isLoading ? "" : (profitLoss >= 0 ? "profit" : "loss")}>
+        {isLoading ? (
+          <span style={{ color: '#999', fontSize: '12px' }}>Loading...</span>
+        ) : (
+          <>
+            <div>₹{profitLoss >= 0 ? '+' : ''}{profitLoss.toFixed(2)}</div>
+            <div style={{ fontSize: '12px' }}>({profitLoss >= 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)</div>
+          </>
+        )}
       </td>
       <td>
         <button 

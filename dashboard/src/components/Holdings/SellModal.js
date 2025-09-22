@@ -16,12 +16,30 @@ const SellModal = ({
   if (!isOpen || !selectedHolding) return null;
 
   const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value) || 1;
-    setQty(Math.min(Math.max(1, value), selectedHolding.qty));
+    const value = e.target.value;
+    // Allow empty string for typing, but convert to number for validation
+    if (value === '') {
+      setQty('');
+    } else {
+      const numValue = parseInt(value);
+      if (!isNaN(numValue) && numValue >= 0 && numValue <= selectedHolding.qty) {
+        setQty(numValue);
+      }
+    }
     setMessage("");
   };
 
   const placeSellOrder = async () => {
+    if (!qty || qty <= 0) {
+      setMessage("Please enter a valid quantity");
+      return;
+    }
+    
+    if (qty > selectedHolding.qty) {
+      setMessage("Quantity cannot exceed available shares");
+      return;
+    }
+    
     setLoading(true);
     setMessage("");
     
@@ -67,7 +85,7 @@ const SellModal = ({
   };
 
   const totalSaleValue = qty * selectedHolding.price;
-  const canSell = qty > 0 && qty <= selectedHolding.qty;
+  const canSell = qty && qty > 0 && qty <= selectedHolding.qty;
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
