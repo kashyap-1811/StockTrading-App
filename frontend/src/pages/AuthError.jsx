@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, Home, RefreshCw, ArrowLeft, UserPlus } from 'lucide-react';
-import './ErrorPage.css';
+import '../components/ErrorPage.css';
 
 const AuthError = () => {
   const [searchParams] = useSearchParams();

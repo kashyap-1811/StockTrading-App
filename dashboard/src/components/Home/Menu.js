@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
@@ -13,6 +14,24 @@ const Menu = () => {
   const handleProfileClick = (index) => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const res = await axios.get("http://localhost:8000/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(res.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const menuClass = "menu";
   const activeMenuClass = "menu selected";
@@ -49,7 +68,7 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to="funds"
+              to="/funds"
               onClick={() => handleMenuClick(4)}
             >
               <p className={selectedMenu === 4 ? activeMenuClass : menuClass}>
@@ -62,8 +81,20 @@ const Menu = () => {
         <hr />
         <Link style={{ textDecoration: "none" }} to="/profile">
           <div className="profile" onClick={handleProfileClick}>
-            <div className="avatar">U</div>
-            <p className="username">Profile</p>
+            <div className="avatar">
+              {user?.profilePicture ? (
+                <img 
+                  src={user.profilePicture} 
+                  alt="Profile" 
+                  className="avatar-image"
+                />
+              ) : (
+                <div className="avatar-initial">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+              )}
+            </div>
+            <p className="username">{user?.name || 'Profile'}</p>
           </div>
         </Link>
       </div>

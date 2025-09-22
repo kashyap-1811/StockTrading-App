@@ -13,7 +13,7 @@ import Footer from './landing_page/Footer'
 import AuthSuccess from './pages/AuthSuccess'
 import AuthError from './pages/AuthError'
 import Dashboard from './pages/Dashboard'
-import ErrorPage from './pages/ErrorPage'
+import ErrorPage from './components/ErrorPage'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>

@@ -4,16 +4,24 @@ class StockService {
     constructor() {
         this.yahooBaseUrl = 'https://query1.finance.yahoo.com/v8/finance/chart';
         this.cache = new Map();
-        this.cacheExpiry = 0; // No cache - always fetch fresh data
+        this.cacheExpiry = 30000; // 30 seconds cache to ensure consistency
+        this.companiesCache = null;
+        this.companiesCacheExpiry = 0;
     }
 
     // Get all 100 companies data
     async getAllCompanies() {
         try {
+            // Check if we have cached companies data that's still valid
+            if (this.companiesCache && Date.now() - this.companiesCacheExpiry < 30000) {
+                console.log('Returning cached companies data');
+                return this.companiesCache;
+            }
+
             const allSymbols = this.get100IndianSymbols();
             const stockData = await this.getMultipleStockPrices(allSymbols);
             
-            return stockData
+            const companiesData = stockData
                 .filter(stock => stock.success && stock.data)
                 .map(stock => ({
                     symbol: this.cleanSymbolForDisplay(stock.data.symbol),
@@ -23,6 +31,12 @@ class StockService {
                     changePercent: stock.data.changePercent,
                     isDown: stock.data.change < 0
                 }));
+
+            // Cache the results
+            this.companiesCache = companiesData;
+            this.companiesCacheExpiry = Date.now();
+            
+            return companiesData;
         } catch (error) {
             console.error('Error fetching companies:', error);
             return this.getMockCompanies();
@@ -32,20 +46,49 @@ class StockService {
     // Search companies
     async searchCompanies(query) {
         try {
+            // First try to use cached companies data for consistency
+            if (this.companiesCache && Date.now() - this.companiesCacheExpiry < 30000) {
+                const searchResults = this.companiesCache.filter(company => 
+                    company.symbol.toLowerCase().includes(query.toLowerCase()) ||
+                    company.name.toLowerCase().includes(query.toLowerCase())
+                );
+                return searchResults.slice(0, 10);
+            }
+
+            // If no cache, get fresh data
             const allCompanies = this.get100IndianCompanies();
             const searchResults = allCompanies.filter(company => 
                 company.symbol.toLowerCase().includes(query.toLowerCase()) ||
                 company.name.toLowerCase().includes(query.toLowerCase())
             );
 
-            return searchResults.slice(0, 10).map(company => ({
-                symbol: company.symbol,
-                name: company.name,
-                price: Math.random() * 500 + 50,
-                change: (Math.random() - 0.5) * 20,
-                changePercent: ((Math.random() - 0.5) * 10).toFixed(2),
-                isDown: Math.random() < 0.5
-            }));
+            // Get current prices for search results to maintain consistency
+            const symbolsToFetch = searchResults.slice(0, 10).map(company => company.symbol);
+            const stockData = await this.getMultipleStockPrices(symbolsToFetch);
+            
+            return searchResults.slice(0, 10).map((company, index) => {
+                const stockInfo = stockData[index];
+                if (stockInfo && stockInfo.success && stockInfo.data) {
+                    return {
+                        symbol: this.cleanSymbolForDisplay(company.symbol),
+                        name: company.name,
+                        price: stockInfo.data.price,
+                        change: stockInfo.data.change,
+                        changePercent: stockInfo.data.changePercent,
+                        isDown: stockInfo.data.change < 0
+                    };
+                } else {
+                    // Fallback to mock data if API fails
+                    return {
+                        symbol: this.cleanSymbolForDisplay(company.symbol),
+                        name: company.name,
+                        price: Math.random() * 500 + 50,
+                        change: (Math.random() - 0.5) * 20,
+                        changePercent: ((Math.random() - 0.5) * 10).toFixed(2),
+                        isDown: Math.random() < 0.5
+                    };
+                }
+            });
         } catch (error) {
             console.error('Error searching companies:', error);
             return [];
@@ -272,6 +315,14 @@ class StockService {
     getCompanyName(symbol) {
         const company = this.get100IndianCompanies().find(c => c.symbol === symbol);
         return company ? company.name : this.cleanSymbolForDisplay(symbol);
+    }
+
+    // Clear cache (useful for testing or manual refresh)
+    clearCache() {
+        this.cache.clear();
+        this.companiesCache = null;
+        this.companiesCacheExpiry = 0;
+        console.log('Stock service cache cleared');
     }
 
     // Get last 15 days price data for a stock

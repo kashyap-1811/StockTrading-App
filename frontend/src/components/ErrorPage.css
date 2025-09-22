@@ -1,0 +1,428 @@
+/* Blue-themed Error Page with White Background */
+
+.error-page-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  padding: 40px 20px;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  width: 100%;
+  gap: 80px;
+}
+
+/* Left Side - Text Content */
+.error-left {
+  flex: 1;
+  max-width: 500px;
+}
+
+.error-text {
+  margin-bottom: 40px;
+}
+
+.error-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+}
+
+.error-message {
+  font-size: 24px;
+  color: #374151;
+  margin: 0 0 30px 0;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.possible-reasons {
+  margin-top: 30px;
+  background: #eff6ff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 2px solid #dbeafe;
+}
+
+.possible-reasons h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e40af;
+  margin: 0 0 15px 0;
+}
+
+.possible-reasons ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.possible-reasons li {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  padding-left: 0;
+}
+
+.possible-reasons li:before {
+  content: "•";
+  color: #3b82f6;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+/* Action Buttons */
+.error-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.error-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  min-width: 140px;
+  text-align: center;
+}
+
+.primary-btn {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.primary-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.secondary-btn {
+  background: white;
+  color: #374151;
+  border: 2px solid #3b82f6;
+}
+
+.secondary-btn:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Right Side - Illustration */
+.error-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.error-illustration {
+  position: relative;
+  width: 400px;
+  height: 400px;
+}
+
+/* 404 Illustration - Blue Theme */
+.illustration-404 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.blue-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+}
+
+.sad-envelope {
+  position: relative;
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.envelope-body {
+  font-size: 80px;
+  filter: brightness(0) invert(1);
+}
+
+.sad-face {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  color: white;
+  font-family: monospace;
+}
+
+.ground-patch {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 40px;
+  background: #1e3a8a;
+  border-radius: 20px 20px 0 0;
+}
+
+.cloud {
+  position: absolute;
+  font-size: 40px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.cloud-1 {
+  top: 20%;
+  left: 10%;
+  animation: float 3s ease-in-out infinite;
+}
+
+.cloud-2 {
+  top: 15%;
+  right: 15%;
+  animation: float 3s ease-in-out infinite 1.5s;
+}
+
+.scattered-envelopes {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.envelope-small {
+  position: absolute;
+  font-size: 24px;
+  opacity: 0.6;
+  color: #3b82f6;
+}
+
+.envelope-1 {
+  top: 60%;
+  left: 5%;
+  animation: float 4s ease-in-out infinite 0.5s;
+}
+
+.envelope-2 {
+  top: 70%;
+  right: 10%;
+  animation: float 4s ease-in-out infinite 1s;
+}
+
+.envelope-3 {
+  bottom: 20%;
+  left: 20%;
+  animation: float 4s ease-in-out infinite 2s;
+}
+
+/* Simple Illustration for Other Error Types */
+.simple-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #eff6ff;
+  border-radius: 20px;
+  border: 3px solid #dbeafe;
+}
+
+.error-icon-large {
+  font-size: 120px;
+  color: #3b82f6;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .error-content {
+    gap: 60px;
+  }
+  
+  .error-title {
+    font-size: 40px;
+  }
+  
+  .error-message {
+    font-size: 20px;
+  }
+  
+  .error-illustration {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .blue-circle {
+    width: 220px;
+    height: 220px;
+  }
+  
+  .envelope-body {
+    font-size: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .error-content {
+    flex-direction: column;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .error-left {
+    max-width: 100%;
+  }
+  
+  .error-title {
+    font-size: 36px;
+  }
+  
+  .error-message {
+    font-size: 18px;
+  }
+  
+  .error-actions {
+    justify-content: center;
+  }
+  
+  .error-illustration {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .blue-circle {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .envelope-body {
+    font-size: 50px;
+  }
+  
+  .cloud {
+    font-size: 30px;
+  }
+  
+  .envelope-small {
+    font-size: 20px;
+  }
+  
+  .error-icon-large {
+    font-size: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-page-container {
+    padding: 20px 16px;
+  }
+  
+  .error-content {
+    gap: 30px;
+  }
+  
+  .error-title {
+    font-size: 28px;
+  }
+  
+  .error-message {
+    font-size: 16px;
+  }
+  
+  .possible-reasons {
+    padding: 20px;
+  }
+  
+  .possible-reasons h3 {
+    font-size: 16px;
+  }
+  
+  .possible-reasons li {
+    font-size: 14px;
+  }
+  
+  .error-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 120px;
+  }
+  
+  .error-illustration {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .blue-circle {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .envelope-body {
+    font-size: 40px;
+  }
+  
+  .sad-face {
+    font-size: 18px;
+  }
+  
+  .cloud {
+    font-size: 24px;
+  }
+  
+  .envelope-small {
+    font-size: 16px;
+  }
+  
+  .error-icon-large {
+    font-size: 60px;
+  }
+}

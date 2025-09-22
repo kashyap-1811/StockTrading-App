@@ -2,11 +2,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import GeneralContext from "../../contexts/GeneralContext";
+import { useStockContext } from "../../contexts/StockContext";
 import "./SellActionWindow.css";
 
 const SellActionWindow = ({ uid, companyName, userHoldings = 0 }) => {
   // ✅ FIXED: Use useContext hook properly
   const { closeSellWindow } = useContext(GeneralContext);
+  const { getCompanyData } = useStockContext();
   
   const [quantity, setQuantity] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
@@ -24,12 +26,21 @@ const SellActionWindow = ({ uid, companyName, userHoldings = 0 }) => {
   const fetchCurrentPrice = async () => {
     try {
       setFetchingPrice(true);
-      // Fetch current price from your stock API
+      
+      // First try to get price from StockContext for consistency
+      const companyData = getCompanyData(uid);
+      if (companyData && companyData.price) {
+        setCurrentPrice(companyData.price);
+        setFetchingPrice(false);
+        return;
+      }
+      
+      // Fallback: Fetch current price from API if not in context
       const response = await axios.get(`http://localhost:8000/stocks/price/${uid}`);
       if (response.data.success) {
-        setCurrentPrice(response.data.price);
+        setCurrentPrice(response.data.data.price);
       } else {
-        // Fallback: search for the stock to get current price
+        // Final fallback: search for the stock to get current price
         const searchResponse = await axios.get(`http://localhost:8000/stocks/search?q=${uid}`);
         if (searchResponse.data.success && searchResponse.data.data.length > 0) {
           setCurrentPrice(searchResponse.data.data[0].price);

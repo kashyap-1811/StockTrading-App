@@ -21,6 +21,7 @@ const Dashboard = () => {
       </GeneralContextProvider>
       <div className="content">
         <Routes>
+          <Route path="/" element={<WatchList />} />
           <Route path="/holdings" element={<Holdings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/trade/:symbol" element={<Trade />} />
