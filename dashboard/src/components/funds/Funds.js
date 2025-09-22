@@ -38,7 +38,10 @@ const Funds = () => {
       const fres = await axios.get("http://localhost:8000/funds", { headers: { Authorization: `Bearer ${token}` } });
       setTotalAdded(fres.data?.totalPointsAdded || 0);
       setHistory(fres.data?.history || []);
-    } catch (e) {}
+    } catch (e) {
+      console.error('Add funds error:', e);
+      throw e; // Re-throw to be handled by the calling function
+    }
   };
 
   const withdrawFunds = async (val) => {
@@ -53,7 +56,10 @@ const Funds = () => {
       const fres = await axios.get("http://localhost:8000/funds", { headers: { Authorization: `Bearer ${token}` } });
       setTotalAdded(fres.data?.totalPointsAdded || 0);
       setHistory(fres.data?.history || []);
-    } catch (e) {}
+    } catch (e) {
+      console.error('Withdraw error:', e);
+      throw e; // Re-throw to be handled by the calling function
+    }
   };
 
   const openModal = (mode) => {
@@ -77,6 +83,13 @@ const Funds = () => {
       setModalError("Enter a valid amount");
       return;
     }
+    
+    // Additional validation for withdraw
+    if (modalMode === "WITHDRAW" && val > points) {
+      setModalError("Insufficient points");
+      return;
+    }
+    
     setModalLoading(true);
     try {
       if (modalMode === "ADD") {

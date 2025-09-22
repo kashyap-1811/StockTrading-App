@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import GeneralContext from "../GeneralContext";
+import GeneralContext from "../../contexts/GeneralContext";
 import BuyModal from './BuyModal';
 
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
@@ -27,7 +27,7 @@ const WatchListActions = ({ stock, uid, companyName }) => {
       });
       setWalletPoints(response.data?.points || 0);
     } catch (error) {
-      console.error('Error loading wallet:', error);
+      setWalletPoints(0);
     }
   };
 
@@ -38,6 +38,8 @@ const WatchListActions = ({ stock, uid, companyName }) => {
   const handleBuySuccess = (cost) => {
     setWalletPoints(prev => prev - cost);
     setIsBuyModalOpen(false);
+    // Trigger holdings refresh
+    window.dispatchEvent(new CustomEvent('holdingsUpdated'));
   };
 
   const handleAnalyticsClick = () => {

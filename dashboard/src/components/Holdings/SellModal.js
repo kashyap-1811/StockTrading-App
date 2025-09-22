@@ -1,4 +1,3 @@
-// components/SellModal.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import './SellModal.css';
@@ -17,21 +16,12 @@ const SellModal = ({
   if (!isOpen || !selectedHolding) return null;
 
   const handleQuantityChange = (e) => {
-    const value = Math.max(1, Math.min(selectedHolding.qty, Number(e.target.value)));
-    setQty(value);
+    const value = parseInt(e.target.value) || 1;
+    setQty(Math.min(Math.max(1, value), selectedHolding.qty));
     setMessage("");
   };
 
   const placeSellOrder = async () => {
-    if (!qty || qty <= 0) {
-      setMessage("Enter valid quantity");
-      return;
-    }
-    if (qty > selectedHolding.qty) {
-      setMessage("Insufficient holdings");
-      return;
-    }
-    
     setLoading(true);
     setMessage("");
     
@@ -43,7 +33,7 @@ const SellModal = ({
       await axios.post(
         "http://localhost:8000/sell",
         { 
-          symbol: selectedHolding.name, 
+          symbol: selectedHolding.symbol, 
           qty: Number(qty), 
           price: Number(currentPrice)
         },
@@ -52,9 +42,9 @@ const SellModal = ({
       
       setMessage(`Successfully sold ${qty} ${selectedHolding.name} @ ₹${currentPrice.toFixed(2)}`);
       
-      // Notify parent component of successful sale
       setTimeout(() => {
         onSellSuccess(proceeds);
+        window.dispatchEvent(new CustomEvent('holdingsUpdated'));
         onClose();
       }, 2000);
     } catch (e) {

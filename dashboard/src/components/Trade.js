@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
@@ -27,8 +27,8 @@ const Trade = () => {
   const isModeLocked = searchParams.get("mode") !== null; // Lock mode if specified in URL
   const isFromSell = searchParams.get("mode") === "sell"; // Check if coming from sell
 
-  const cost = useMemo(() => Number(qty) * Number(price), [qty, price]);
-  const canSubmit = useMemo(() => qty > 0 && price > 0 && !loading, [qty, price, loading]);
+  const cost = Number(qty) * Number(price);
+  const canSubmit = qty > 0 && price > 0 && !loading;
 
   useEffect(() => {
     const loadUser = async () => {
@@ -60,6 +60,8 @@ const Trade = () => {
       setMessage(`${isBuy ? "Bought" : "Sold"} ${qty} ${symbol} @ ${price}`);
       // optimistic wallet update
       setWalletPoints(prev => (isBuy ? prev - cost : prev + cost));
+      // Trigger holdings refresh
+      window.dispatchEvent(new CustomEvent('holdingsUpdated'));
     } catch (e) {
       setMessage(e?.response?.data?.error || "Request failed");
     } finally {
@@ -142,11 +144,24 @@ const Trade = () => {
           <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
             <div>
               <label style={{ display: "block", color: "#6b7280", fontSize: 12 }}>Quantity</label>
-              <input type="number" min={1} onChange={e => setQty(Number(e.target.value))} style={{ padding: 8, border: "1px solid #e5e7eb", borderRadius: 8, width: 160 }} />
+              <input 
+                type="number" 
+                min={1} 
+                value={qty || ''} 
+                onChange={e => setQty(Math.max(1, Number(e.target.value) || 1))} 
+                style={{ padding: 8, border: "1px solid #e5e7eb", borderRadius: 8, width: 160 }} 
+              />
             </div>
             <div>
               <label style={{ display: "block", color: "#6b7280", fontSize: 12 }}>Price</label>
-              <input type="number" step="0.05" min={0} onChange={e => setPrice(Number(e.target.value))} style={{ padding: 8, border: "1px solid #e5e7eb", borderRadius: 8, width: 160 }} />
+              <input 
+                type="number" 
+                step="0.05" 
+                min={0} 
+                value={price || ''} 
+                onChange={e => setPrice(Math.max(0, Number(e.target.value) || 0))} 
+                style={{ padding: 8, border: "1px solid #e5e7eb", borderRadius: 8, width: 160 }} 
+              />
             </div>
             <div>
               <button disabled={!canSubmit || (isBuy && cost > walletPoints)} onClick={placeOrder} className="btn btn-blue" style={{ background: headerColor }}>

@@ -1,20 +1,31 @@
-// Holdings.js
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useStockContext } from "../../contexts/StockContext";
 import SellModal from "./SellModal";
 import "./Holdings.css";
 
 const Holdings = () => {
   const [holdings, setHoldings] = useState([]);
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [walletPoints, setWalletPoints] = useState(0);
+  const { getCompanyData, companies } = useStockContext();
 
   useEffect(() => {
     fetchHoldings();
     loadWallet();
+  }, []);
+
+  // Listen for holdings updates from buy/sell operations
+  useEffect(() => {
+    const handleHoldingsUpdate = () => {
+      fetchHoldings();
+      loadWallet();
+    };
+
+    window.addEventListener('holdingsUpdated', handleHoldingsUpdate);
+    return () => window.removeEventListener('holdingsUpdated', handleHoldingsUpdate);
   }, []);
 
   const fetchHoldings = async () => {
@@ -28,6 +39,42 @@ const Holdings = () => {
       console.error("Error fetching holdings:", error);
     }
   };
+
+  const updateHoldingsWithCurrentPrices = useCallback(() => {
+    const updatedHoldings = holdings.map(holding => {
+      // Get current company data from StockContext
+      const companyData = getCompanyData(holding.symbol);
+      
+      if (companyData) {
+        const currentPrice = companyData.price;
+        const totalInvested = holding.qty * holding.avg;
+        const currentValue = holding.qty * currentPrice;
+        const profitLoss = currentValue - totalInvested;
+        const profitLossPercentage = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
+        
+        return {
+          ...holding,
+          currentPrice: currentPrice,
+          totalInvested: totalInvested,
+          currentValue: currentValue,
+          profitLoss: profitLoss,
+          profitLossPercentage: profitLossPercentage
+        };
+      }
+      
+      // If no current data available, return holding as is
+      return holding;
+    });
+    
+    setHoldings(updatedHoldings);
+  }, [holdings, getCompanyData]);
+
+  // Update holdings with current prices when companies data changes
+  useEffect(() => {
+    if (holdings.length > 0 && companies.length > 0) {
+      updateHoldingsWithCurrentPrices();
+    }
+  }, [companies, holdings.length, updateHoldingsWithCurrentPrices]); // Add the callback dependency
 
   const loadWallet = async () => {
     try {
@@ -48,7 +95,7 @@ const Holdings = () => {
 
   const handleSellSuccess = (proceeds) => {
     setWalletPoints(prev => prev + proceeds);
-    fetchHoldings(); // Refresh holdings
+    // Holdings will be refreshed by the 'holdingsUpdated' event from SellModal
   };
 
   const closeModal = () => {
@@ -56,10 +103,11 @@ const Holdings = () => {
     setSelectedHolding(null);
   };
 
-  const totalInvestment = holdings.reduce((sum, h) => sum + h.avg * h.qty, 0);
-  const currentValue = holdings.reduce((sum, h) => sum + h.price * h.qty, 0);
-  const pnl = currentValue - totalInvestment;
-  const pnlPercent = ((pnl / totalInvestment) * 100).toFixed(2);
+  // Calculate totals using the updated holdings with current prices from StockContext
+  const totalInvestment = holdings.reduce((sum, h) => sum + (h.totalInvested || h.avg * h.qty), 0);
+  const currentValue = holdings.reduce((sum, h) => sum + (h.currentValue || h.price * h.qty), 0);
+  const pnl = holdings.reduce((sum, h) => sum + (h.profitLoss || 0), 0);
+  const pnlPercent = totalInvestment > 0 ? ((pnl / totalInvestment) * 100).toFixed(2) : '0.00';
 
   return (
     <>
@@ -118,13 +166,11 @@ const HoldingsTable = ({ holdings, onSellClick }) => (
       <thead>
         <tr>
           <th>Instrument</th>
-          <th>Qty.</th>
-          <th>Avg. Cost</th>
-          <th>LTP</th>
-          <th>Cur. Value</th>
-          <th>P&L</th>
-          <th>Net Chg.</th>
-          <th>Day Chg.</th>
+          <th>Quantity</th>
+          <th>Purchased Cost per Stock</th>
+          <th>Total Cost</th>
+          <th>Current Cost per Stock</th>
+          <th>Profit/Loss</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -143,22 +189,27 @@ const HoldingsTable = ({ holdings, onSellClick }) => (
 
 // Separate component for each holding row
 const HoldingRow = ({ holding, onSellClick }) => {
-  const currentVal = (holding.price * holding.qty).toFixed(2);
-  const gain = holding.price * holding.qty - holding.avg * holding.qty;
-  const gainFormatted = gain.toFixed(2);
-  const isNetPositive = parseFloat(holding.net) >= 0;
-  const isDayPositive = parseFloat(holding.day) >= 0;
+  // Use current price from StockContext if available, otherwise use stored price
+  const currentPrice = holding.currentPrice || holding.price;
+  const profitLoss = holding.profitLoss || (currentPrice * holding.qty - holding.avg * holding.qty);
+  const profitLossPercentage = holding.profitLossPercentage || (holding.avg > 0 ? ((profitLoss / (holding.avg * holding.qty)) * 100) : 0);
 
   return (
     <tr>
-      <td>{holding.name}</td>
+      <td>
+        <div>
+          <strong>{holding.symbol || holding.name}</strong>
+          <div style={{ fontSize: '12px', color: '#666' }}>{holding.name}</div>
+        </div>
+      </td>
       <td>{holding.qty}</td>
-      <td>{holding.avg.toFixed(2)}</td>
-      <td>{holding.price.toFixed(2)}</td>
-      <td>{currentVal}</td>
-      <td className={gain >= 0 ? "profit" : "loss"}>{gainFormatted}</td>
-      <td className={isNetPositive ? "profit" : "loss"}>{holding.net}</td>
-      <td className={isDayPositive ? "profit" : "loss"}>{holding.day}</td>
+      <td>₹{holding.avg.toFixed(2)}</td>
+      <td>₹{holding.price.toFixed(2)}</td>
+      <td>₹{currentPrice.toFixed(2)}</td>
+      <td className={profitLoss >= 0 ? "profit" : "loss"}>
+        <div>₹{profitLoss >= 0 ? '+' : ''}{profitLoss.toFixed(2)}</div>
+        <div style={{ fontSize: '12px' }}>({profitLoss >= 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)</div>
+      </td>
       <td>
         <button 
           onClick={() => onSellClick(holding)}

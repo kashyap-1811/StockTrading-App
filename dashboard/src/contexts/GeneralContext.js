@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import BuyActionWindow from "./BuyActionWindow";
-import SellActionWindow from "./Sell/SellActionWindow";
+import BuyActionWindow from "../components/BuyActionWindow";
+import SellActionWindow from "../components/Sell/SellActionWindow";
 
 const GeneralContext = React.createContext({
   openBuyWindow: (uid) => {},

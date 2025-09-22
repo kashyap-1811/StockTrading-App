@@ -62,14 +62,14 @@ app.get("/verify", verifyToken, (req, res) => {
   res.json({ success: true, user: req.user });
 });
 
-// Get top 50 companies for watchlist
-app.get('/stocks/top-companies', async (req, res) => {
+// Get all companies
+app.get('/stocks/companies', async (req, res) => {
   try {
-    const topCompanies = await stockService.getTopCompanies();
-    res.json({ success: true, data: topCompanies });
+    const companies = await stockService.getAllCompanies();
+    res.json({ success: true, data: companies });
   } catch (error) {
-    console.error('Error fetching top companies:', error);
-    res.status(500).json({ error: 'Unable to fetch top companies' });
+    console.error('Error fetching companies:', error);
+    res.status(500).json({ error: 'Unable to fetch companies' });
   }
 });
 
@@ -187,16 +187,15 @@ app.post('/buy', verifyToken, async (req, res) => {
     }
 
     // upsert holding
-    let holding = await HoldingsModel.findOne({ userId, name: symbol });
+    let holding = await HoldingsModel.findOne({ userId, symbol: symbol });
     if (!holding) {
       holding = new HoldingsModel({
         userId,
-        name: symbol,
+        symbol: symbol,
+        name: symbol, // Use symbol as name for now
         qty,
         avg: price,
-        price,
-        net: '0',
-        day: '0'
+        price: cost
       });
     } else {
       const totalQty = holding.qty + qty;
@@ -239,7 +238,7 @@ app.post('/sell', verifyToken, async (req, res) => {
     const user = await UsersModel.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    let holding = await HoldingsModel.findOne({ userId, name: symbol });
+    let holding = await HoldingsModel.findOne({ userId, symbol: symbol });
     if (!holding || holding.qty < qty) {
       return res.status(400).json({ error: 'Insufficient holdings' });
     }

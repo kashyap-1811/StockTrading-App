@@ -1,7 +1,7 @@
 // SellActionWindow.js
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import GeneralContext from "../GeneralContext";
+import GeneralContext from "../../contexts/GeneralContext";
 import "./SellActionWindow.css";
 
 const SellActionWindow = ({ uid, companyName, userHoldings = 0 }) => {

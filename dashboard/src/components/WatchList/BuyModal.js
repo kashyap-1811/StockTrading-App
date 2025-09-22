@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './BuyModal.css';
 
 const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess }) => {
   const [quantity, setQuantity] = useState(1);
@@ -19,17 +20,12 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
   };
 
   const handleQuantityChange = (e) => {
-    const value = Math.max(1, parseInt(e.target.value) || 1);
-    setQuantity(value);
-    setMessage(""); // Clear any previous messages
+    const value = parseInt(e.target.value) || 1;
+    setQuantity(Math.max(1, value));
+    setMessage("");
   };
 
   const placeBuyOrder = async () => {
-    if (!quantity || quantity <= 0) {
-      setMessage("Enter valid quantity");
-      return;
-    }
-
     if (!canAfford) {
       setMessage("Insufficient points");
       return;
@@ -53,9 +49,9 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
 
       setMessage(`Successfully bought ${quantity} ${uid} @ ₹${formatPrice(currentPrice)}`);
       
-      // Wait 2 seconds then close and update wallet
       setTimeout(() => {
         onSuccess(totalCost);
+        window.dispatchEvent(new CustomEvent('holdingsUpdated'));
       }, 2000);
 
     } catch (error) {
@@ -73,24 +69,29 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-content">
+      <div className="buy-modal-content">
+        {/* Modal Header */}
         <div className="modal-header">
-          <h3 className="modal-title">Buy {companyName || uid}</h3>
-          <button className="modal-close" onClick={onClose}>
-            ✕
-          </button>
+          <h3 className="buy-title">Buy {companyName || uid}</h3>
+          <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <div className="modal-body">
-          <div className="stock-info-card">
-            <div className="current-price">
-              <span className="label">Current Price:</span>
-              <span className="price">₹{formatPrice(currentPrice)}</span>
-            </div>
+        {/* Stock Info Section */}
+        <div className="stock-info-section">
+          <div className="info-row">
+            <span className="info-label">Current Price:</span>
+            <span className="info-value price">₹{formatPrice(currentPrice)}</span>
           </div>
+          <div className="info-row">
+            <span className="info-label">Available Balance:</span>
+            <span className="info-value">₹{formatPrice(walletPoints)}</span>
+          </div>
+        </div>
 
+        {/* Form Section */}
+        <div className="form-section">
           <div className="form-group">
-            <label className="form-label">Quantity</label>
+            <label className="form-label">Quantity to Buy</label>
             <input 
               type="number" 
               min="1" 
@@ -98,25 +99,27 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
               onChange={handleQuantityChange}
               className="form-input"
               placeholder="Enter quantity"
+              step="1"
             />
           </div>
 
-          <div className="cost-summary">
-            <div className="cost-row">
+          {/* Purchase Summary */}
+          <div className="purchase-summary">
+            <div className="summary-row">
               <span>Quantity:</span>
               <span>{quantity}</span>
             </div>
-            <div className="cost-row">
+            <div className="summary-row">
               <span>Price per share:</span>
               <span>₹{formatPrice(currentPrice)}</span>
             </div>
-            <div className="cost-row total">
+            <div className="summary-row total">
               <span>Total Cost:</span>
               <span>₹{formatPrice(totalCost)}</span>
             </div>
-            <div className="cost-row">
-              <span>Available Balance:</span>
-              <span>₹{formatPrice(walletPoints)}</span>
+            <div className="summary-row">
+              <span>After Purchase Balance:</span>
+              <span>₹{(walletPoints - totalCost).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
             </div>
             {!canAfford && (
               <div className="insufficient-funds">
@@ -125,6 +128,7 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
             )}
           </div>
 
+          {/* Messages */}
           {message && (
             <div className={`message ${message.includes('Successfully') ? 'success' : 'error'}`}>
               {message}

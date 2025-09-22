@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Dashboard from "../Dashboard";
 import TopBar from "./TopBar";
+import { StockProvider } from "../../contexts/StockContext";
 
 const Home = () => {
   const [isValid, setIsValid] = useState(null); // null = loading, true/false = checked
@@ -54,10 +55,10 @@ const Home = () => {
   }
 
   return (
-    <>
+    <StockProvider>
       <TopBar />
       <Dashboard />
-    </>
+    </StockProvider>
   );
 };
 

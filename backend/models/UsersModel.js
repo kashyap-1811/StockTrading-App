@@ -8,10 +8,9 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, unique: true },
     kycStatus: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
     balance: { type: Number, default: 0 },
-    points: { type: Number, default: 0 },
-    totalPointsAdded: { type: Number, default: 0 },
+    points: { type: Number, default: 0 }, // Added points field for wallet functionality
+    totalPointsAdded: { type: Number, default: 0 }, // Track total points added by user
     holdings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Holdings' }],
-    // orders removed
     isActive: { type: Boolean, default: true }
 }, {
     timestamps: true

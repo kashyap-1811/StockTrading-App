@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import axios from "axios";
 
-import GeneralContext from "./GeneralContext";
+import GeneralContext from "../contexts/GeneralContext";
 
 // import "./BuyActionWindow.css";
 
@@ -25,6 +25,9 @@ const BuyActionWindow = ({ uid }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      
+      // Trigger holdings refresh
+      window.dispatchEvent(new CustomEvent('holdingsUpdated'));
     } catch (e) {
       console.error("Buy failed", e);
     }
