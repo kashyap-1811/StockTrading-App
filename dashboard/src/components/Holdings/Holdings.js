@@ -190,6 +190,7 @@ const HoldingsTable = ({ holdings, onSellClick, isLoading }) => (
       <thead>
         <tr>
           <th>Instrument</th>
+          <th>Purchase Date</th>
           <th>Quantity</th>
           <th>Purchased Cost per Stock</th>
           <th>Total Cost</th>
@@ -227,6 +228,9 @@ const HoldingRow = ({ holding, onSellClick, isLoading }) => {
           <strong>{holding.symbol || holding.name}</strong>
           <div style={{ fontSize: '12px', color: '#666' }}>{holding.name}</div>
         </div>
+      </td>
+      <td>
+        {holding.createdAt ? new Date(holding.createdAt).toLocaleDateString('en-IN') : '-'}
       </td>
       <td>{holding.qty}</td>
       <td>₹{holding.avg.toFixed(2)}</td>

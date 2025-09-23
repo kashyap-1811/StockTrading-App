@@ -80,7 +80,21 @@ export const StockProvider = ({ children }) => {
 
   // Function to get company data by symbol
   const getCompanyData = (symbol) => {
-    return companies.find(company => company.symbol === symbol) || null;
+    // First try exact match
+    let company = companies.find(company => company.symbol === symbol);
+    
+    // If not found, try with .NS suffix
+    if (!company && !symbol.includes('.NS')) {
+      company = companies.find(company => company.symbol === symbol + '.NS');
+    }
+    
+    // If still not found, try without .NS suffix
+    if (!company && symbol.includes('.NS')) {
+      const cleanSymbol = symbol.replace('.NS', '');
+      company = companies.find(company => company.symbol === cleanSymbol);
+    }
+    
+    return company || null;
   };
 
   // Initial fetch of companies

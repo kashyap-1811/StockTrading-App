@@ -184,6 +184,7 @@ const Funds = () => {
                 <th>Qty</th>
                 <th>Price</th>
                 <th>Amount</th>
+                <th>P&L</th>
               </tr>
             </thead>
             <tbody>
@@ -195,6 +196,18 @@ const Funds = () => {
                   <td>{h.qty || '-'}</td>
                   <td>{h.price || '-'}</td>
                   <td>{h.amount}</td>
+                  <td>
+                    {h.type === 'SELL' && h.profitLoss !== undefined ? (
+                      <span style={{ 
+                        color: h.profitLoss >= 0 ? '#10b981' : '#ef4444',
+                        fontWeight: '600'
+                      }}>
+                        {h.profitLoss >= 0 ? '+' : ''}₹{h.profitLoss.toLocaleString('en-IN')}
+                      </span>
+                    ) : (
+                      '-'
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

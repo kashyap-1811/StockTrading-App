@@ -145,6 +145,16 @@ const Profile = () => {
             </div>
           </div>
           
+          <div className={`stat-card profit-loss ${user.totalProfitLoss < 0 ? 'loss-card' : ''}`}>
+            <div className="stat-icon">📊</div>
+            <div className="stat-content">
+              <div className="stat-label">Total P&L</div>
+              <div className={`stat-value ${user.totalProfitLoss >= 0 ? 'profit' : 'loss'}`}>
+                {user.totalProfitLoss >= 0 ? '+' : ''}₹{user.totalProfitLoss?.toLocaleString('en-IN') || 0}
+              </div>
+            </div>
+          </div>
+          
           <div className="stat-card holdings">
             <div className="stat-icon">📈</div>
             <div className="stat-content">

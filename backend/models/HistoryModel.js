@@ -7,6 +7,8 @@ const HistorySchema = new mongoose.Schema({
   symbol: { type: String },
   qty: { type: Number },
   price: { type: Number },
+  // Profit/Loss field for SELL transactions
+  profitLoss: { type: Number, default: 0 }, // Absolute profit/loss amount
 }, { timestamps: true });
 
 const HistoryModel = mongoose.model('History', HistorySchema);

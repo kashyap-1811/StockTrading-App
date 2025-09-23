@@ -5,6 +5,11 @@ const HoldingsModel = require('../models/HoldingsModel');
 const UsersModel = require('../models/UsersModel');
 const HistoryModel = require('../models/HistoryModel');
 
+// Helper function to clean symbol (remove .NS suffix)
+const cleanSymbol = (symbol) => {
+  return symbol.replace('.NS', '');
+};
+
 // Get user holdings
 router.get('/holdings', verifyToken, async (req, res) => {
   try {
@@ -27,6 +32,9 @@ router.post('/buy', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid payload' });
     }
 
+    // Clean the symbol to ensure consistency
+    const cleanedSymbol = cleanSymbol(symbol);
+
     const user = await UsersModel.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -36,12 +44,12 @@ router.post('/buy', verifyToken, async (req, res) => {
     }
 
     // upsert holding
-    let holding = await HoldingsModel.findOne({ userId, symbol: symbol });
+    let holding = await HoldingsModel.findOne({ userId, symbol: cleanedSymbol });
     if (!holding) {
       holding = new HoldingsModel({
         userId,
-        symbol: symbol,
-        name: symbol, // Use symbol as name for now
+        symbol: cleanedSymbol,
+        name: cleanedSymbol, // Use cleaned symbol as name for now
         qty,
         avg: price,
         price: cost
@@ -65,7 +73,7 @@ router.post('/buy', verifyToken, async (req, res) => {
     await user.save();
 
     // history
-    await HistoryModel.create({ userId, type: 'BUY', amount: cost, symbol, qty, price });
+    await HistoryModel.create({ userId, type: 'BUY', amount: cost, symbol: cleanedSymbol, qty, price });
 
     res.status(201).json({ success: true, holding, points: user.points });
   } catch (error) {
@@ -84,10 +92,13 @@ router.post('/sell', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid payload' });
     }
 
+    // Clean the symbol to ensure consistency
+    const cleanedSymbol = cleanSymbol(symbol);
+
     const user = await UsersModel.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    let holding = await HoldingsModel.findOne({ userId, symbol: symbol });
+    let holding = await HoldingsModel.findOne({ userId, symbol: cleanedSymbol });
     if (!holding || holding.qty < qty) {
       return res.status(400).json({ error: 'Insufficient holdings' });
     }
@@ -102,12 +113,25 @@ router.post('/sell', verifyToken, async (req, res) => {
       user.holdings = user.holdings.filter(hId => hId.toString() !== holding._id.toString());
     }
 
-    // add points
+    // Calculate profit/loss
     const proceeds = qty * price;
+    const costBasis = qty * holding.avg; // Cost basis for the sold quantity
+    const profitLoss = proceeds - costBasis; // Positive = profit, Negative = loss
+    
+    // Update user's total profit/loss
+    user.totalProfitLoss += profitLoss;
     user.points += proceeds;
     await user.save();
 
-    await HistoryModel.create({ userId, type: 'SELL', amount: proceeds, symbol, qty, price });
+    await HistoryModel.create({ 
+      userId, 
+      type: 'SELL', 
+      amount: proceeds, 
+      symbol: cleanedSymbol, 
+      qty, 
+      price,
+      profitLoss: profitLoss
+    });
 
     res.status(201).json({ success: true, points: user.points });
   } catch (error) {

@@ -21,6 +21,7 @@ const UserSchema = new mongoose.Schema({
     kycStatus: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
     points: { type: Number, default: 0 }, // Added points field for wallet functionality
     totalPointsAdded: { type: Number, default: 0 }, // Track total points added by user
+    totalProfitLoss: { type: Number, default: 0 }, // Track total profit/loss from all sell transactions
     holdings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Holdings' }],
     isActive: { type: Boolean, default: true },
     // Google OAuth fields
