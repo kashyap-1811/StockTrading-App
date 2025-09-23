@@ -1,12 +1,16 @@
 import React from 'react';
-import CreateTicket from './CreateTicket';
 import Hero from './Hero';
+import FAQs from './FAQs';
+import CreateTicket from './CreateTicket';
+import ContactSection from './ContactSection';
 
 function SupportPage() {
     return ( 
         <div>
-            <CreateTicket />
             <Hero />
+            <FAQs />
+            <CreateTicket />
+            <ContactSection />
         </div>
      );
 }

@@ -4,9 +4,9 @@ class StockService {
     constructor() {
         this.yahooBaseUrl = 'https://query1.finance.yahoo.com/v8/finance/chart';
         this.cache = new Map();
-        this.cacheExpiry = 30000; // 30 seconds cache to ensure consistency
+        this.cacheExpiry = -1; // 30 seconds cache to ensure consistency
         this.companiesCache = null;
-        this.companiesCacheExpiry = 0;
+        this.companiesCacheExpiry = -1;
     }
 
     // Get all 100 companies data

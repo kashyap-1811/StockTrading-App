@@ -34,7 +34,7 @@ router.get('/google/callback',
       );
 
       // Redirect to frontend with token
-      const frontendUrl = `http://localhost:3000/auth/success?token=${token}&user=${encodeURIComponent(JSON.stringify({
+      const frontendUrl = `http://localhost:3000/?token=${token}&user=${encodeURIComponent(JSON.stringify({
         id: req.user._id,
         name: req.user.name,
         email: req.user.email,

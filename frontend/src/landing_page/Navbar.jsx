@@ -24,7 +24,7 @@ export default function Navbar() {
                     <li><Link to="/signup" className={currentPath === '/signup' ? "text-primary" : ''} onClick={() => setCurrentPath('/signup')}>Signup</Link></li>
                     <li><Link to="/about" className={currentPath === '/about' ? "text-primary" : ''} onClick={() => setCurrentPath('/about')}>About</Link></li>
                     <li><Link to="/products" className={currentPath === '/products' ? "text-primary" : ''} onClick={() => setCurrentPath('/products')}>Products</Link></li>
-                    <li><Link to="/pricing" className={currentPath === '/pricing' ? "text-primary" : ''} onClick={() => setCurrentPath('/pricing')}>Pricing</Link></li>
+                    <li><Link to="/support" className={currentPath === '/support' ? "text-primary" : ''} onClick={() => setCurrentPath('/support')}>FAQs & Support</Link></li>
 
                     {/* Menu Icon with Dropdown */}
                     <li
