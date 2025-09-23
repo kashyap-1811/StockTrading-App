@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useStockContext } from '../../contexts/StockContext';
 import './SellModal.css';
 
 const SellModal = ({ 
@@ -12,6 +13,7 @@ const SellModal = ({
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const { getCompanyData } = useStockContext();
 
   if (!isOpen || !selectedHolding) return null;
 
@@ -45,7 +47,9 @@ const SellModal = ({
     
     try {
       const token = localStorage.getItem("token");
-      const currentPrice = selectedHolding.currentPrice || selectedHolding.price;
+      // Get current price directly from StockContext
+      const companyData = getCompanyData(selectedHolding.symbol);
+      const currentPrice = companyData ? companyData.price : selectedHolding.avg;
       const proceeds = qty * currentPrice;
       
       await axios.post(
@@ -84,7 +88,9 @@ const SellModal = ({
     }
   };
 
-  const currentPrice = selectedHolding.currentPrice || selectedHolding.price;
+  // Get current price directly from StockContext
+  const companyData = getCompanyData(selectedHolding.symbol);
+  const currentPrice = companyData ? companyData.price : selectedHolding.avg;
   const totalSaleValue = qty * currentPrice;
   const canSell = qty && qty > 0 && qty <= selectedHolding.qty;
 

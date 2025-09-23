@@ -65,17 +65,14 @@ export const StockProvider = ({ children }) => {
     }
   }, []);
 
-  // Function to get stock price for a specific symbol
-  const fetchStockPrice = async (symbol) => {
-    try {
-      const response = await axios.get(`http://localhost:8000/stocks/price/${symbol}`);
-      if (response.data.success) {
-        return response.data.data;
-      }
-    } catch (error) {
-      console.error(`Error fetching price for ${symbol}:`, error);
-      return null;
-    }
+  // Function to get stock price for a specific symbol from companies array
+  const fetchStockPrice = (symbol) => {
+    // Use the companies array instead of making backend calls
+    const companyData = getCompanyData(symbol);
+    return companyData ? {
+      symbol: companyData.symbol,
+      price: companyData.price
+    } : null;
   };
 
   // Function to get company data by symbol
@@ -116,8 +113,6 @@ export const StockProvider = ({ children }) => {
     companies,
     loading,
     lastUpdated,
-    fetchCompanies,
-    fetchCompaniesSilently,
     searchCompanies,
     fetchStockPrice,
     getCompanyData

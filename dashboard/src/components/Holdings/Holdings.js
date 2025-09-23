@@ -10,7 +10,7 @@ const Holdings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [walletPoints, setWalletPoints] = useState(0);
-  const { getCompanyData, companies, loading: companiesLoading } = useStockContext();
+  const { getCompanyData } = useStockContext();
 
   useEffect(() => {
     fetchHoldings();
@@ -40,47 +40,7 @@ const Holdings = () => {
     }
   };
 
-  // Update holdings with current prices when companies data changes
-  useEffect(() => {
-    if (holdings.length > 0 && companies.length > 0) {
-      const updatedHoldings = holdings.map(holding => {
-        // Get current company data from StockContext
-        const companyData = getCompanyData(holding.symbol);
-        
-        if (companyData) {
-          const currentPrice = companyData.price;
-          const totalInvested = holding.qty * holding.avg;
-          const currentValue = holding.qty * currentPrice;
-          const profitLoss = currentValue - totalInvested;
-          const profitLossPercentage = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
-          
-          return {
-            ...holding,
-            currentPrice: currentPrice,
-            totalInvested: totalInvested,
-            currentValue: currentValue,
-            profitLoss: profitLoss,
-            profitLossPercentage: profitLossPercentage
-          };
-        }
-        
-        // If no current data available, return holding as is
-        return holding;
-      });
-      
-      // Only update if there are actual changes to prevent unnecessary re-renders
-      const hasChanges = updatedHoldings.some((updated, index) => {
-        const original = holdings[index];
-        return updated.currentPrice !== original.currentPrice ||
-               updated.profitLoss !== original.profitLoss ||
-               updated.profitLossPercentage !== original.profitLossPercentage;
-      });
-      
-      if (hasChanges) {
-        setHoldings(updatedHoldings);
-      }
-    }
-  }, [companies, getCompanyData]); // Only depend on companies and getCompanyData
+  // No need for complex useEffect - HoldingRow components will fetch prices directly from StockContext
 
   const loadWallet = async () => {
     try {
@@ -109,12 +69,17 @@ const Holdings = () => {
     setSelectedHolding(null);
   };
 
-  // Calculate totals using the updated holdings with current prices from StockContext
-  // Only calculate when companies data is loaded
-  const totalInvestment = companiesLoading ? 0 : holdings.reduce((sum, h) => sum + (h.totalInvested || h.avg * h.qty), 0);
-  const currentValue = companiesLoading ? 0 : holdings.reduce((sum, h) => sum + (h.currentValue || h.price * h.qty), 0);
-  const pnl = companiesLoading ? 0 : holdings.reduce((sum, h) => sum + (h.profitLoss || 0), 0);
-  const pnlPercent = companiesLoading ? '0.00' : (totalInvestment > 0 ? ((pnl / totalInvestment) * 100).toFixed(2) : '0.00');
+  // Calculate totals directly from StockContext data
+  const totalInvestment = holdings.reduce((sum, h) => sum + (h.avg * h.qty), 0);
+  
+  const currentValue = holdings.reduce((sum, h) => {
+    const companyData = getCompanyData(h.symbol);
+    const currentPrice = companyData ? companyData.price : h.avg; // Fallback to avg price if no current data
+    return sum + (currentPrice * h.qty);
+  }, 0);
+  
+  const pnl = currentValue - totalInvestment;
+  const pnlPercent = totalInvestment > 0 ? ((pnl / totalInvestment) * 100).toFixed(2) : '0.00';
 
   return (
     <>
@@ -127,13 +92,13 @@ const Holdings = () => {
         currentValue={currentValue}
         pnl={pnl}
         pnlPercent={pnlPercent}
-        isLoading={companiesLoading}
+        isLoading={false}
       />
 
       <HoldingsTable 
         holdings={holdings}
         onSellClick={handleSellClick}
-        isLoading={companiesLoading}
+        isLoading={false}
       />
 
       <SellModal
@@ -215,9 +180,13 @@ const HoldingsTable = ({ holdings, onSellClick, isLoading }) => (
 
 // Separate component for each holding row
 const HoldingRow = ({ holding, onSellClick, isLoading }) => {
-  // Use current price ONLY from StockContext to ensure consistency
-  const currentPrice = holding.currentPrice;
-  // Calculate profit/loss only if current price is available from StockContext
+  const { getCompanyData } = useStockContext();
+  
+  // Get current price directly from StockContext
+  const companyData = getCompanyData(holding.symbol);
+  const currentPrice = companyData ? companyData.price : null;
+  
+  // Calculate profit/loss based on current price from StockContext
   const profitLoss = currentPrice ? (currentPrice * holding.qty - holding.avg * holding.qty) : 0;
   const profitLossPercentage = currentPrice && holding.avg > 0 ? ((profitLoss / (holding.avg * holding.qty)) * 100) : 0;
 
