@@ -107,7 +107,10 @@ const SellModal = ({
         <div className="stock-info-section">
           <div className="info-row">
             <span className="info-label">Current Price:</span>
-            <span className="info-value price">₹{currentPrice.toFixed(2)}</span>
+            <span className="info-value price">
+              ₹{currentPrice.toFixed(2)}
+              <span className="live-indicator" title="Live price updates">🔴</span>
+            </span>
           </div>
           <div className="info-row">
             <span className="info-label">You Own:</span>

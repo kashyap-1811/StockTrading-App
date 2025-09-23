@@ -3,7 +3,22 @@ require('dotenv').config();
 
 // express
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  maxHttpBufferSize: 1e6
+});
 const router = express.Router();
 
 // mongoose
@@ -135,9 +150,27 @@ passport.deserializeUser(async (id, done) => {
 
 
 // --------------------------------------------------------------------------------------------------------
+// Socket.io connection handling
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+// Make io available globally for stock service
+global.io = io;
+
+// --------------------------------------------------------------------------------------------------------
 // server start
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    
+    // Start continuous stock price updates
+    const stockService = require('./services/stockService');
+    stockService.startContinuousUpdates();
+    console.log('Real-time stock price updates started');
 });
 
 // --------------------------------------------------------------------------------------------------------

@@ -33,6 +33,13 @@
   padding-bottom: 2rem;
 }
 
+.hero-subtitle {
+  color: #0d0227;
+  font-size: 14px;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
 /* Image Styling */
 .hero-image-container {
   width: 100%;
@@ -137,7 +144,7 @@
 }
 
 .zerodha-text {
-  color: #6b7280;
+  color: #374151;
   font-size: 14px;
 }
 

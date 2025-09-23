@@ -22,8 +22,8 @@ const handleSubmit = async (e) => {
   try {
     const endpoint =
       mode === "signup"
-        ? "http://localhost:8000/signup"
-        : "http://localhost:8000/login";
+        ? "http://localhost:8000/auth/signup"
+        : "http://localhost:8000/auth/login";
 
     // Only send necessary fields
     const payload =

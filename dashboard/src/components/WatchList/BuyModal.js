@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useStockContext } from '../../contexts/StockContext';
 import './BuyModal.css';
 
 const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess }) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const { getCompanyData } = useStockContext();
 
-  // Use current stock price (not editable)
-  const currentPrice = stock.price;
+  // Get real-time current price from StockContext
+  const companyData = getCompanyData(uid);
+  const currentPrice = companyData ? companyData.price : stock.price;
   const totalCost = (quantity || 0) * currentPrice;
   const canAfford = walletPoints >= totalCost && quantity > 0;
 
@@ -93,7 +96,10 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
         <div className="stock-info-section">
           <div className="info-row">
             <span className="info-label">Current Price:</span>
-            <span className="info-value price">₹{formatPrice(currentPrice)}</span>
+            <span className="info-value price">
+              ₹{formatPrice(currentPrice)}
+              <span className="live-indicator" title="Live price updates">🔴</span>
+            </span>
           </div>
           <div className="info-row">
             <span className="info-label">Available Balance:</span>

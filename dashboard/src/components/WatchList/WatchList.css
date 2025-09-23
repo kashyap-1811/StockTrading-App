@@ -50,6 +50,20 @@
   color: #9ca3af;
 }
 
+/* Live indicator styles */
+.live-indicator {
+  font-size: 8px;
+  margin-left: 6px;
+  animation: pulse 2s infinite;
+  vertical-align: middle;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
 .search:-moz-placeholder {
   color: #9ca3af;
   opacity: 1;

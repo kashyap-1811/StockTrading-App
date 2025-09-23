@@ -17,7 +17,7 @@ const Summary = () => {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { getCompanyData, companies, loading: companiesLoading } = useStockContext();
+  const { getCompanyData, companies, loading: companiesLoading, isConnected } = useStockContext();
 
   // Color palette for different stocks
   const colors = [
@@ -178,6 +178,14 @@ const Summary = () => {
       <div className="summary-header">
         <h1>Portfolio Summary</h1>
         <p>Total Portfolio Value: ₹{totalValue.toFixed(2)}</p>
+        <div className="connection-status">
+          <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}>
+            {isConnected ? '🟢 Live' : '🔴 Offline'}
+          </span>
+          <span className="status-text">
+            {isConnected ? 'Real-time updates active' : 'Connection lost - using cached data'}
+          </span>
+        </div>
       </div>
 
       <div className="summary-content">
