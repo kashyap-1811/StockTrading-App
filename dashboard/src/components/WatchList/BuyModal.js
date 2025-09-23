@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useStockContext } from '../../contexts/StockContext';
 import './BuyModal.css';
@@ -8,6 +8,15 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const { getCompanyData } = useStockContext();
+
+  // Reset modal state when stock changes
+  useEffect(() => {
+    if (stock) {
+      setQuantity(1);
+      setLoading(false);
+      setMessage("");
+    }
+  }, [stock]);
 
   // Get real-time current price from StockContext
   const companyData = getCompanyData(uid);

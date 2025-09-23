@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useStockContext } from '../../contexts/StockContext';
 import './SellModal.css';
@@ -14,6 +14,15 @@ const SellModal = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const { getCompanyData } = useStockContext();
+
+  // Reset modal state when selectedHolding changes or modal opens
+  useEffect(() => {
+    if (selectedHolding && isOpen) {
+      setQty(1);
+      setLoading(false);
+      setMessage("");
+    }
+  }, [selectedHolding, isOpen]);
 
   if (!isOpen || !selectedHolding) return null;
 
