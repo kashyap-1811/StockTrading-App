@@ -29,7 +29,9 @@ const WatchListActions = ({ stock, uid, companyName }) => {
   };
 
   const handleBuyClick = () => {
+    console.log('Buy button clicked for:', uid);
     setIsBuyModalOpen(true);
+    console.log('Modal state set to true');
   };
 
   const handleBuySuccess = (cost) => {
@@ -72,14 +74,17 @@ const WatchListActions = ({ stock, uid, companyName }) => {
       </span>
 
       {isBuyModalOpen && (
-        <BuyModal
-          stock={stock}
-          uid={uid}
-          companyName={companyName}
-          walletPoints={walletPoints}
-          onClose={() => setIsBuyModalOpen(false)}
-          onSuccess={handleBuySuccess}
-        />
+        <>
+          {console.log('Rendering BuyModal for:', uid, 'Modal open:', isBuyModalOpen)}
+          <BuyModal
+            stock={stock}
+            uid={uid}
+            companyName={companyName}
+            walletPoints={walletPoints}
+            onClose={() => setIsBuyModalOpen(false)}
+            onSuccess={handleBuySuccess}
+          />
+        </>
       )}
     </>
   );

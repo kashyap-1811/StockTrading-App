@@ -4,11 +4,13 @@ const userRoutes = require('./user');
 const stockRoutes = require('./stocks');
 const tradingRoutes = require('./trading');
 const fundsRoutes = require('./funds');
+const razorpayRoutes = require('./RazorPayPayment');
 
 module.exports = {
   authRoutes,
   userRoutes,
   stockRoutes,
   tradingRoutes,
-  fundsRoutes
+  fundsRoutes,
+  razorpayRoutes
 };

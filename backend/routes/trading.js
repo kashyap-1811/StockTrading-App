@@ -44,29 +44,21 @@ router.post('/buy', verifyToken, async (req, res) => {
     }
 
     // upsert holding
-    let holding = await HoldingsModel.findOne({ userId, symbol: cleanedSymbol });
-    if (!holding) {
-      holding = new HoldingsModel({
-        userId,
-        symbol: cleanedSymbol,
-        name: cleanedSymbol, // Use cleaned symbol as name for now
-        qty,
-        avg: price,
-        price: cost
-      });
-    } else {
-      const totalQty = holding.qty + qty;
-      const totalCost = holding.avg * holding.qty + price * qty;
-      holding.avg = totalCost / totalQty;
-      holding.qty = totalQty;
-      holding.price = price;
-    }
+    // let holding = await HoldingsModel.findOne({ userId, symbol: cleanedSymbol });
+    let holding = new HoldingsModel({
+      userId,
+      symbol: cleanedSymbol,
+      name: cleanedSymbol, // Use cleaned symbol as name for now
+      qty,
+      avg: price,
+      price: cost
+    });
     await holding.save();
 
     // link holding to user if new
-    if (!user.holdings.includes(holding._id)) {
+    // if (!user.holdings.includes(holding._id)) {
       user.holdings.push(holding._id);
-    }
+    // }
 
     // deduct points
     user.points -= cost;
@@ -136,6 +128,51 @@ router.post('/sell', verifyToken, async (req, res) => {
     res.status(201).json({ success: true, points: user.points });
   } catch (error) {
     console.error('Sell error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Withdraw wallet points
+router.post('/wallet/withdraw', verifyToken, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+    const user = await UsersModel.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if ((user.points || 0) < numericAmount) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+    user.points = (user.points || 0) - numericAmount;
+    await user.save();
+    await HistoryModel.create({ userId: user._id, type: 'WITHDRAW', amount: numericAmount });
+    res.json({ success: true, points: user.points });
+  } catch (error) {
+    console.error('Wallet withdraw error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Add wallet points
+router.post('/wallet/add', verifyToken, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+    const user = await UsersModel.findById(req.user.id);
+    
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.points = (user.points || 0) + numericAmount;
+    user.totalPointsAdded = (user.totalPointsAdded || 0) + numericAmount;
+    await user.save();
+    await HistoryModel.create({ userId: user._id, type: 'ADD_FUNDS', amount: numericAmount });
+    res.json({ success: true, points: user.points });
+  } catch (error) {
+    console.error('Wallet add error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

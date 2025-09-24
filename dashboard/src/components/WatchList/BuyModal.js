@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useStockContext } from '../../contexts/StockContext';
 import './BuyModal.css';
@@ -92,7 +93,10 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
     }
   };
 
-  return (
+  // Debug: Log when modal renders
+  console.log('BuyModal rendering for:', uid, 'isOpen:', !!stock);
+
+  const modalContent = (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
       <div className="buy-modal-content">
         {/* Modal Header */}
@@ -183,6 +187,8 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default BuyModal;

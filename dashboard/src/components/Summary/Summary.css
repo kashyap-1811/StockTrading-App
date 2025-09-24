@@ -64,7 +64,7 @@
 
 .summary-content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr; /* stack: chart on top, list below */
   gap: 40px;
   align-items: start;
 }
@@ -102,11 +102,9 @@
 }
 
 .legend-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  max-height: 400px;
-  overflow-y: auto;
 }
 
 .legend-item {
@@ -210,9 +208,9 @@
   .chart-container {
     height: 350px;
   }
-  
+
   .legend-container {
-    max-height: 350px;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -248,7 +246,7 @@
   }
   
   .legend-container {
-    max-height: 300px;
+    grid-template-columns: 1fr;
   }
   
   .legend-item {
@@ -288,7 +286,6 @@
   }
   
   .legend-container {
-    max-height: 250px;
   }
   
   .legend-item {
@@ -311,20 +308,4 @@
 }
 
 /* Custom scrollbar for legend */
-.legend-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.legend-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.legend-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.legend-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
+/* removed custom scrollbar since list is fully open */

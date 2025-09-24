@@ -175,7 +175,7 @@ server.listen(PORT, () => {
 
 // --------------------------------------------------------------------------------------------------------
 // Import route files
-const { authRoutes, userRoutes, stockRoutes, tradingRoutes, fundsRoutes } = require('./routes');
+const { authRoutes, userRoutes, stockRoutes, tradingRoutes, fundsRoutes, razorpayRoutes } = require('./routes');
 
 // --------------------------------------------------------------------------------------------------------
 // Basic route
@@ -190,6 +190,7 @@ app.use('/', userRoutes);
 app.use('/stocks', stockRoutes);
 app.use('/', tradingRoutes);
 app.use('/funds', fundsRoutes);
+app.use('/', razorpayRoutes);
 
 // --------------------------------------------------------------------------------------------------------
 

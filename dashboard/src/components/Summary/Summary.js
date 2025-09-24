@@ -19,13 +19,6 @@ const Summary = () => {
   const [error, setError] = useState(null);
   const { getCompanyData, companies, loading: companiesLoading, isConnected } = useStockContext();
 
-  // Color palette for different stocks
-  const colors = [
-    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-    '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
-    '#36A2EB', '#FFCE56', '#9966FF', '#FF9F40', '#C9CBCF'
-  ];
-
   useEffect(() => {
     fetchHoldings();
   }, []);
@@ -68,10 +61,27 @@ const Summary = () => {
     const token = localStorage.getItem("token");
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8000/holdings", {
+      const rawHoldings = await axios.get("http://localhost:8000/holdings", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setHoldings(response.data);
+
+      // Merge holdings by symbol
+      const mergedHoldings = Object.values(
+        rawHoldings.data.reduce((acc, item) => {
+          if (!acc[item.symbol]) {
+            acc[item.symbol] = { ...item }; // copy first occurrence
+          } else {
+            // Example: combine quantity & adjust average price
+            acc[item.symbol].qty += item.qty;
+
+            // You can also decide how to handle "price" field
+            acc[item.symbol].price += item.price; // keep latest price
+          }
+          return acc;
+        }, {})
+      );
+
+      setHoldings(mergedHoldings);
       setError(null);
     } catch (error) {
       console.error("Error fetching holdings:", error);
@@ -79,6 +89,13 @@ const Summary = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360); // 0–359 (full spectrum)
+    const saturation = 70 + Math.random() * 30;  // 70–100% (vivid colors)
+    const lightness = 40 + Math.random() * 20;   // 40–60% (not too dark/light)
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
 
   // Prepare chart data
@@ -90,13 +107,15 @@ const Summary = () => {
       return {
         symbol: holding.symbol || holding.name,
         value: currentValue,
-        color: colors[index % colors.length],
+        color: getRandomColor(),
         qty: holding.qty,
         avgPrice: holding.avg,
         currentPrice: holding.currentPrice || holding.price
       };
     });
 
+    // Sort chart data by value in descending order
+    chartData.sort((a, b) => b.value - a.value);
     return chartData;
   };
 
@@ -197,7 +216,7 @@ const Summary = () => {
         </div>
 
         <div className="legend-section">
-          <h2>Holdings Legend</h2>
+          <h2>Holdings</h2>
           <div className="legend-container">
             {chartData && chartData.map((item, index) => {
               const percentage = ((item.value / totalValue) * 100).toFixed(1);
