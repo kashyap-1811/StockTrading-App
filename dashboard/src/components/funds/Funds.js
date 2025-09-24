@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import "./Funds.css";
 
 const Funds = () => {
   const [points, setPoints] = useState(0);
@@ -141,100 +142,199 @@ const Funds = () => {
     }
   };
 
+  // Calculate summary statistics
+  const totalWithdrawn = history
+    .filter(h => h.type === 'WITHDRAW')
+    .reduce((sum, h) => sum + Math.abs(h.amount), 0);
+  
+  const recentTransactions = history.slice(0, 15);
+  const hasRecentActivity = recentTransactions.length > 0;
+
   return (
     <>
-      <div className="funds" style={{ justifyContent: "space-between", marginBottom: '20px' }}>
-        <div>
-          {/* <p>Wallet points for investing</p> */}
-          <div style={{ marginTop: '8px', fontSize: '18px', fontWeight: 'bold', color: '#2563eb' }}>
-            Current wallet points: {points.toLocaleString('en-IN')}
-          </div>
-        </div>
-        <div>
-          <Link className="btn btn-green" onClick={() => openModal("ADD")} style={{ background: '#4caf50' }}>Add funds</Link>
-          <Link className="btn btn-blue" onClick={() => openModal("WITHDRAW")} style={{ marginLeft: 8 }}>Withdraw</Link>
-        </div>
+      <div className="funds-header">
+        <h3>Funds Management</h3>
       </div>
 
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0' }}>
-          <h4>History (recent 15 transactions)</h4>
-          <button 
-            onClick={exportCSV} 
-            style={{ 
-              padding: '8px 16px', 
-              backgroundColor: '#2563eb', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '6px', 
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            Export CSV
-          </button>
-            </div>
-        <div className="order-table" style={{ maxHeight: 480, overflowY: 'auto' }}>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left' }}>Time</th>
-                <th>Type</th>
-                <th>Symbol</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Amount</th>
-                <th>P&L</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.slice(0, 15).map((h, idx) => (
-                <tr key={idx}>
-                  <td className="align-left">{new Date(h.createdAt).toLocaleString()}</td>
-                  <td>{h.type}</td>
-                  <td>{h.symbol || '-'}</td>
-                  <td>{h.qty || '-'}</td>
-                  <td>{h.price || '-'}</td>
-                  <td>{h.amount}</td>
-                  <td>
-                    {h.type === 'SELL' && h.profitLoss !== undefined ? (
-                      <span style={{ 
-                        color: h.profitLoss >= 0 ? '#10b981' : '#ef4444',
-                        fontWeight: '600'
-                      }}>
-                        {h.profitLoss >= 0 ? '+' : ''}₹{h.profitLoss.toLocaleString('en-IN')}
-                      </span>
-                    ) : (
-                      '-'
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <SummaryCards 
+        currentBalance={points}
+        totalAdded={totalAdded}
+        totalWithdrawn={totalWithdrawn}
+        isLoading={false}
+      />
+
+      <div className="funds-actions">
+        <button 
+          className="btn btn-primary" 
+          onClick={() => openModal("ADD")}
+        >
+          Add Funds
+        </button>
+        <button 
+          className="btn btn-secondary" 
+          onClick={() => openModal("WITHDRAW")}
+        >
+          Withdraw
+        </button>
+        <button 
+          className="btn btn-outline" 
+          onClick={exportCSV}
+        >
+          Export CSV
+        </button>
       </div>
+
+      <FundsTable 
+        history={recentTransactions}
+        isLoading={false}
+      />
       
-      {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', width: 360 }}>
-            <div style={{ padding: 16, borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <strong>{modalMode === 'ADD' ? 'Add funds' : 'Withdraw funds'}</strong>
-              <button onClick={closeModal} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>✕</button>
-            </div>
-            <div style={{ padding: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8 }}>Amount</label>
-              <input type="number" min={1} value={modalAmount} onChange={(e) => setModalAmount(e.target.value)} style={{ width: '90%', padding: 10, border: '1px solid #e5e7eb', borderRadius: 8, boxSizing: 'border-box', marginRight: '10%' }} />
-              {modalError && <div style={{ color: '#ef4444', marginTop: 8 }}>{modalError}</div>}
-            </div>
-            <div style={{ padding: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button onClick={closeModal} style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Cancel</button>
-              <button onClick={confirmModal} disabled={modalLoading} style={{ padding: '10px 14px', borderRadius: 8, border: 'none', background: modalMode === 'ADD' ? '#4caf50' : '#2563eb', color: '#fff', cursor: 'pointer' }}>{modalLoading ? 'Processing...' : (modalMode === 'ADD' ? 'Add' : 'Withdraw')}</button>
-            </div>
+      <FundsModal
+        isOpen={isModalOpen}
+        mode={modalMode}
+        amount={modalAmount}
+        error={modalError}
+        loading={modalLoading}
+        onClose={closeModal}
+        onAmountChange={setModalAmount}
+        onConfirm={confirmModal}
+      />
+    </>
+  );
+};
+
+// Summary Cards Component
+const SummaryCards = ({ currentBalance, totalAdded, totalWithdrawn, isLoading }) => (
+  <div className="summary-row">
+    <div className="summary-card">
+      <h5>
+        {isLoading ? (
+          <span className="loading-text">Loading...</span>
+        ) : (
+          `₹${currentBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+        )}
+      </h5>
+      <p>Current Balance</p>
+    </div>
+    <div className="summary-card">
+      <h5>
+        {isLoading ? (
+          <span className="loading-text">Loading...</span>
+        ) : (
+          `₹${totalAdded.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+        )}
+      </h5>
+      <p>Total Added</p>
+    </div>
+    <div className="summary-card">
+      <h5>
+        {isLoading ? (
+          <span className="loading-text">Loading...</span>
+        ) : (
+          `₹${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+        )}
+      </h5>
+      <p>Total Withdrawn</p>
+    </div>
+  </div>
+);
+
+// Funds Table Component
+const FundsTable = ({ history, isLoading }) => (
+  <div className="order-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Type</th>
+          <th>Symbol</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Amount</th>
+          <th>P&L</th>
+        </tr>
+      </thead>
+      <tbody>
+        {history.map((h, idx) => (
+          <FundsRow key={idx} transaction={h} isLoading={isLoading} />
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+// Individual Row Component
+const FundsRow = ({ transaction, isLoading }) => (
+  <tr>
+    <td>
+      {new Date(transaction.createdAt).toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}
+    </td>
+    <td>
+      <span className={`transaction-type ${transaction.type.toLowerCase()}`}>
+        {transaction.type}
+      </span>
+    </td>
+    <td>{transaction.symbol || '-'}</td>
+    <td>{transaction.qty || '-'}</td>
+    <td>{transaction.price ? `₹${transaction.price.toFixed(2)}` : '-'}</td>
+    <td>₹{transaction.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+    <td>
+      {transaction.type === 'SELL' && transaction.profitLoss !== undefined ? (
+        <span className={transaction.profitLoss >= 0 ? "profit" : "loss"}>
+          {transaction.profitLoss >= 0 ? '+' : ''}₹{transaction.profitLoss.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+        </span>
+      ) : (
+        '-'
+      )}
+    </td>
+  </tr>
+);
+
+// Modal Component
+const FundsModal = ({ isOpen, mode, amount, error, loading, onClose, onAmountChange, onConfirm }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>{mode === 'ADD' ? 'Add Funds' : 'Withdraw Funds'}</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label className="form-label">Amount (₹)</label>
+            <input
+              type="number"
+              min="1"
+              value={amount}
+              onChange={(e) => onAmountChange(e.target.value)}
+              className="form-input"
+              placeholder="Enter amount"
+            />
+            {error && <div className="error-message">{error}</div>}
           </div>
         </div>
-      )}
-    </>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button 
+            className={`btn ${mode === 'ADD' ? 'btn-success' : 'btn-primary'}`}
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : (mode === 'ADD' ? 'Add Funds' : 'Withdraw')}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

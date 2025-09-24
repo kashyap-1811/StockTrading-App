@@ -1,0 +1,513 @@
+/* CSS Variables for consistent theming - matching Holdings */
+:root {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+  --color-profit: #059669;
+  --color-loss: #dc2626;
+  --color-primary: #2563eb;
+  --color-success: #10b981;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-shadow-light: rgba(0, 0, 0, 0.05);
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --border-radius: 12px;
+  --border-radius-lg: 16px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Header */
+.funds-header {
+  margin: 16px 0 24px 0;
+}
+
+.funds-header h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.funds-header h3::before {
+  content: '💰';
+  font-size: 1.5rem;
+}
+
+/* Summary Cards - matching Holdings */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.summary-card {
+  background: var(--color-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 6px var(--color-shadow-light), 0 1px 3px var(--color-shadow);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), #3b82f6);
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--color-shadow), 0 4px 10px var(--color-shadow-light);
+}
+
+.summary-card h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.summary-card p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.loading-text {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* Action Buttons */
+.funds-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), #3b82f6);
+  color: white;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--color-success), #059669);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Table Styling - matching Holdings */
+.order-table {
+  background: var(--color-bg);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 6px var(--color-shadow-light), 0 1px 3px var(--color-shadow);
+  border: 1px solid var(--color-border);
+}
+
+.order-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-table th,
+.order-table td {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border-light);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.order-table thead {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+.order-table th {
+  background-color: transparent;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.order-table tbody tr {
+  transition: var(--transition);
+}
+
+.order-table tbody tr:hover {
+  background-color: var(--color-bg-secondary);
+  transform: scale(1.01);
+}
+
+.order-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Transaction Type Styling */
+.transaction-type {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.transaction-type.buy {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.transaction-type.sell {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-loss);
+}
+
+.transaction-type.add {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.transaction-type.withdraw {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+/* Color codes with improved contrast */
+.profit {
+  color: var(--color-profit);
+  font-weight: 600;
+}
+
+.loss {
+  color: var(--color-loss);
+  font-weight: 600;
+}
+
+/* Modal Styling */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--color-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 90%;
+  max-width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-bg-secondary);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  color: var(--color-text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.error-message {
+  color: var(--color-loss);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--color-bg-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .summary-row {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .funds-actions {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .summary-card {
+    padding: 1.5rem;
+  }
+  
+  .funds-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .btn {
+    justify-content: center;
+  }
+  
+  .order-table {
+    overflow-x: auto;
+  }
+  
+  .order-table table {
+    min-width: 800px;
+    font-size: 0.875rem;
+  }
+  
+  .order-table th,
+  .order-table td {
+    padding: 1rem 0.75rem;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .funds-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .summary-card h5 {
+    font-size: 1.5rem;
+  }
+  
+  .order-table table {
+    font-size: 0.8rem;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+  }
+  
+  .transaction-type {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+  }
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states for keyboard navigation */
+.btn:focus,
+.modal-close:focus,
+.form-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .funds-actions,
+  .modal-backdrop {
+    display: none;
+  }
+  
+  .summary-card,
+  .order-table {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
