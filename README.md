@@ -104,7 +104,7 @@ PORT=8000
 
 # JWT
 JWT_SECRET=replace-with-a-strong-secret
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=xd
 
 # Session
 SESSION_SECRET=replace-with-a-strong-session-secret
@@ -201,5 +201,3 @@ cd StockTrading
 
 ### License
 ISC — see `package.json` in `backend`.
-
-
