@@ -1,203 +1,242 @@
-## StockTrading Monorepo
+# 📈 StockTrading — Real-Time Stock Trading Simulation Platform
 
-Modern full‑stack stock trading simulation platform with three apps:
-- `backend`: Node.js/Express API with MongoDB, JWT auth, Google OAuth, Razorpay integration, and Socket.IO for live prices.
-- `dashboard`: React (CRA) trading dashboard for authenticated users (watchlist, buy/sell, holdings, analytics, funds).
-- `frontend`: React (Vite) marketing/landing site (public pages, signup flow) that routes users to the dashboard.
+A **modern full-stack stock trading simulation platform** built using the **MERN stack** (MongoDB, Express, React, Node.js) and the **Finnhub API** for live market data.
+It enables users to learn long-term investment and portfolio management through a realistic, feature-rich simulation of real-world stock trading — without using real money.
 
-### Features
-- **Live market data via Socket.IO**: real‑time price updates streamed to the dashboard watchlist and analytics.
-- **Historical charts (last 15 days)**: view recent price history for any stock in `StockAnalytics` (Chart.js).
-- **Paper trading (Buy/Sell)**: place simulated orders; updates `Holdings` and `History` with average price and realized P&L.
-- **Wallet with Razorpay top‑ups**: add funds using Razorpay Checkout; server verifies payment and credits wallet.
-- **Withdraw to wallet balance**: decrease wallet points with validation and history entries.
-- **Funds history export (CSV)**: download recent transactions as CSV from the dashboard.
-- **Auth with JWT + Google OAuth**: secure endpoints with `verifyToken`, login via Google or local strategy.
-- **Responsive dashboard UI**: watchlist management, holdings view, summary KPIs, and profile section.
+---
 
-### Architecture
-- **API (`backend`)**
-  - Express routes under `backend/routes/`:
-    - `auth.js`: local + Google OAuth, JWT issuance, session setup.
-    - `user.js`: user profile, account details, secure with `verifyToken`.
-    - `funds.js`: wallet queries, add/withdraw, CSV export; uses Razorpay endpoints for order create and verification.
-    - `trading.js`: buy/sell execution, persists to `HoldingsModel` and `HistoryModel`, emits updates.
-    - `stocks.js`: market data endpoints; integrates with `services/stockService.js` for price fetching/streaming.
-    - `RazorPayPayment.js`: payment webhook/callback handling (server‑side verification).
-  - Middlewares: `Middlewares/verifyToken.js` validates JWT, attaches `req.user`.
-  - Data: `models/UsersModel.js`, `HoldingsModel.js`, `HistoryModel.js` using Mongoose.
-  - Realtime: `socket.io` broadcasts price ticks and trade/funds updates to subscribed clients.
-  - Config: `.env` controls DB, JWT, session, and Razorpay keys.
+## 🚀 Overview
 
-- **Dashboard (`dashboard`)**
-  - React 18 app (CRA). Entry: `src/index.js` renders `Home` and nested routes.
-  - Global state via `contexts/StockContext.js` for live company data and prices.
-  - Key features/components:
-    - `WatchList/*`: list, search, and modal flows for Buy; uses API + realtime price updates.
-    - `Holdings/*`: portfolio view, Sell modal, realized P&L, quantity updates.
-    - `Summary/*`: account snapshots and performance.
-    - `StockAnalytics/*`: charts (`chart.js`/`react-chartjs-2`) for price trends.
-    - `funds/*`: add/withdraw funds via Razorpay checkout, transaction history, CSV export.
-    - `Profile/*`: user details.
-    - `Error/*`: error boundary and fallback UI.
+This project replicates a real-world trading environment for **educational and simulation purposes**, enabling users to:
 
-- **Frontend (`frontend`)**
-  - React (Vite) marketing site (Navbar, landing home, products, pricing, support, signup).
-  - Routes under `src/landing_page/**` and `src/pages/**` for auth success/error and dashboard redirection.
+* Analyze live market data and trends
+* Simulate buy/sell operations
+* Manage holdings and funds
+* Visualize profit/loss performance over time
 
-### Technical Flows
-- **Authentication**
-  - Local or Google OAuth (via `passport`). On success, API signs a JWT (`JWT_SECRET`, `JWT_EXPIRES_IN`).
-  - Clients persist token (e.g., `localStorage`) and send `Authorization: Bearer <token>`; server enforces via `verifyToken` middleware.
+It’s designed as a **monorepo** with three main applications:
 
-- **Funds and Payments (Razorpay)**
-  - Client requests order creation → `backend` creates order with Razorpay key, returns `order_id`.
-  - Client opens Razorpay Checkout, completes payment; handler sends `razorpay_order_id`, `payment_id`, `signature` to API.
-  - API verifies signature, credits wallet, persists history, and emits updates.
+| App           | Description                                                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **backend**   | Node.js + Express API with MongoDB, JWT authentication, Google OAuth, Razorpay wallet transactions, and Socket.IO for live updates. |
+| **dashboard** | React (CRA) dashboard for authenticated users — includes Watchlist, Holdings, Analytics, and Funds management.                      |
+| **frontend**  | React (Vite) marketing site for visitors and onboarding (landing page, signup flow, about, support).                                |
 
-- **Trading**
-  - Buy/Sell endpoints validate balance/holdings, compute average price/realized P&L, persist `HoldingsModel` + `HistoryModel`.
-  - Dashboard updates holdings and history, and may receive realtime updates over `socket.io`.
+---
 
-- **Market Data**
-  - `stockService.js` abstracts fetching/streaming of price data; API exposes current and historical data. Dashboard subscribes for live ticks.
+## ✨ Key Features
 
-- **Exports**
-  - Funds history CSV export streams a CSV Blob from API; dashboard triggers a download via a temporary anchor element.
+* 🔄 **Live Market Data (Socket.IO + Finnhub API)**
+  Real-time stock price streaming to the dashboard for watchlist and analytics modules.
 
-### Project Structure
+* 💹 **15-Day Historical Charts (Chart.js)**
+  Interactive visualizations of stock trends and performance over time.
+
+* 💰 **Paper Trading (Simulated Buy/Sell)**
+  Users can place simulated orders — automatically updating holdings, average prices, and realized P&L.
+
+* 🏦 **Wallet System with Razorpay Integration**
+  Add funds using Razorpay Checkout (test mode supported). Transactions are verified on the backend and reflected in the wallet instantly.
+
+* 📉 **Withdrawals & Fund History Management**
+  Users can withdraw funds, view all wallet transactions, and **export fund history as CSV**.
+
+* 🔐 **Authentication & Security**
+  JWT-based authentication and **Google OAuth 2.0** support via Passport.js for secure logins.
+
+* 📊 **Dashboard Analytics**
+  Portfolio summary, holdings overview, account KPIs, and stock analytics — all in one responsive, modern interface.
+
+* ⚙️ **Real-Time Sync**
+  WebSocket events push trade, fund, and price updates to connected clients immediately.
+
+---
+
+## 🏗️ Architecture Overview
+
+### **Backend (Node.js / Express)**
+
+Handles authentication, trading logic, wallet management, and realtime updates.
+
+**Key modules:**
+
+* `routes/`
+
+  * `auth.js` — Local & Google OAuth login, JWT issuance
+  * `funds.js` — Add/withdraw funds, Razorpay verification, CSV export
+  * `trading.js` — Simulated buy/sell execution, holdings updates
+  * `stocks.js` — Market data (via `stockService.js`)
+  * `user.js` — Profile and account operations
+* `models/` — Mongoose models for Users, Holdings, and History
+* `Middlewares/verifyToken.js` — JWT validation middleware
+* `services/stockService.js` — Live + historical data fetching and broadcasting via Socket.IO
+
+### **Dashboard (React)**
+
+Authenticated trading dashboard for users.
+
+**Key Components:**
+
+* `WatchList/` — Real-time watchlist with Buy modal
+* `Holdings/` — Portfolio view with Sell modal and performance metrics
+* `Summary/` — Financial overview and performance summary
+* `StockAnalytics/` — Interactive stock charts (Chart.js)
+* `funds/` — Razorpay top-ups, withdrawals, and transaction history
+* `Profile/` — User info and account settings
+
+Global context managed via `contexts/StockContext.js`.
+
+### **Frontend (React + Vite)**
+
+Public marketing website:
+
+* Home, Products, Pricing, Support, and Signup routes
+* Redirects to Dashboard post-authentication
+
+---
+
+## 🔐 Technical Flows
+
+### **1. Authentication**
+
+* Supports both local and Google OAuth strategies via Passport.
+* On success, backend issues a JWT (`JWT_SECRET` + `JWT_EXPIRES_IN`).
+* Clients store the token (e.g., in `localStorage`) and send `Authorization: Bearer <token>` for secure access.
+
+### **2. Funds & Payments**
+
+* Client initiates a top-up → backend creates Razorpay order → frontend opens Razorpay Checkout.
+* Upon successful payment, backend verifies signature and credits user’s wallet.
+* Withdrawals update wallet and transaction history in MongoDB.
+
+### **3. Trading Flow**
+
+* Buy/Sell requests are validated for balance and holdings.
+* Backend calculates average cost, realized P&L, and updates both Holdings and History.
+* Socket.IO broadcasts trade events to update the dashboard in real time.
+
+### **4. Market Data**
+
+* `stockService.js` fetches live prices via Finnhub API and historical data from Alpha Vantage.
+* Price ticks are emitted over Socket.IO for live dashboard updates.
+
+---
+
+## 🧩 Project Structure
+
 ```
-backend/
-  index.js
-  Middlewares/verifyToken.js
-  models/{UsersModel,HoldingsModel,HistoryModel}.js
-  routes/{auth,funds,index,RazorPayPayment,stocks,trading,user}.js
-  services/stockService.js
-  env.example
-
-dashboard/
-  public/index.html
-  src/index.js
-  src/contexts/StockContext.js
-  src/components/{Home,WatchList,Holdings,Summary,StockAnalytics,funds,Profile,Error}/...
-
-frontend/
-  index.html
-  src/main.jsx
-  src/pages/{AuthSuccess,AuthError,Dashboard}.jsx
-  src/landing_page/** (Navbar, home, products, pricing, signup, support, about)
+StockTrading-App-main/
+│
+├── backend/
+│   ├── index.js
+│   ├── routes/{auth,funds,stocks,trading,user,RazorPayPayment}.js
+│   ├── models/{UsersModel,HoldingsModel,HistoryModel}.js
+│   ├── services/stockService.js
+│   ├── Middlewares/verifyToken.js
+│   └── env.example
+│
+├── dashboard/
+│   ├── public/
+│   └── src/
+│       ├── contexts/StockContext.js
+│       └── components/{Home,WatchList,Holdings,Summary,StockAnalytics,funds,Profile,Error}/...
+│
+└── frontend/
+    ├── src/pages/{AuthSuccess,AuthError,Dashboard}.jsx
+    └── src/landing_page/{Navbar,Home,Products,Pricing,Support,Signup,About}.jsx
 ```
 
-### Prerequisites
-- Node.js 18+
-- npm 9+
-- MongoDB 6+ running locally or a MongoDB Atlas connection string
-- Razorpay account (test keys) for funds flows (optional for local dev without payments)
+---
 
-### Environment Variables (.env)
-Create `backend/.env` using the example below (see `backend/env.example`).
+## ⚙️ Environment Setup
 
-```
-# Database
+### **Requirements**
+
+* Node.js ≥ 18
+* npm ≥ 9
+* MongoDB ≥ 6 (local or Atlas)
+* Razorpay test keys (optional for wallet demo)
+
+### **.env Configuration**
+
+Located at `backend/.env`:
+
+```env
 MONGO_URL=mongodb://localhost:27017/stocktrading
 PORT=8000
 
-# JWT
-JWT_SECRET=replace-with-a-strong-secret
-JWT_EXPIRES_IN=xd
+JWT_SECRET=replace-with-strong-secret
+JWT_EXPIRES_IN=1d
+SESSION_SECRET=replace-with-strong-session-secret
 
-# Session
-SESSION_SECRET=replace-with-a-strong-session-secret
-
-# Google OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
-# Razorpay Payment Gateway
 KEY_ID=rzp_test_xxxxxxxxxxxx
-KEY_SECRET=your_razorpay_key_secret
+KEY_SECRET=your_razorpay_secret
 
 FINNHUB_API_KEY=your-finnhub-api
-ALPHA_VANTAGE_API_KEY=your-alpha-vintage-api
+ALPHA_VANTAGE_API_KEY=your-alpha-vantage-api
 ```
 
-No `.env` is required for `dashboard` (CRA) or `frontend` (Vite) for a basic run, but you may add a `.env` to configure API base URLs if you customize.
+---
 
-### Installation
-Run these from the repository root after cloning.
+## 🧠 Installation & Setup
 
-1) Backend
-```
+Run these commands from the repo root:
+
+### Backend
+
+```bash
 cd backend
 npm install
-```
-
-2) Dashboard (CRA)
-```
-cd dashboard
-npm install
-```
-
-3) Frontend (Vite)
-```
-cd frontend
-npm install
-```
-
-### Running Locally
-Open three terminals or run sequentially while keeping servers running.
-
-1) Start API (backend)
-```
-cd backend
 npm run start
-# Runs nodemon index.js → http://localhost:8000 (configure with PORT)
 ```
 
-2) Start Dashboard (React CRA)
-```
+### Dashboard
+
+```bash
 cd dashboard
+npm install
 npm start
-# CRA dev server → http://localhost:3000
 ```
 
-3) Start Frontend (Vite)
-```
+### Frontend
+
+```bash
 cd frontend
+npm install
 npm run dev
-# Vite dev server → http://localhost:5173
 ```
 
-### Default Local URLs
-- Backend API: `http://localhost:8000`
-- Dashboard App: `http://localhost:3000`
-- Frontend (marketing) App: `http://localhost:5173`
+**Local URLs:**
 
-If you adjust ports, update any hardcoded client API URLs (e.g., in `dashboard` components that call `http://localhost:8000/...`).
+* Backend API → `http://localhost:8000`
+* Dashboard → `http://localhost:3000`
+* Frontend → `http://localhost:5173`
 
-### Cloning This Repository
-```
-git clone <your-repo-url> StockTrading
-cd StockTrading
-# Follow Installation and Running Locally sections
-```
+---
 
-### Notable Scripts
-- `backend/package.json`
-  - `start`: `nodemon index.js`
-- `dashboard/package.json`
-  - `start`: `react-scripts start`
-  - `build`: `react-scripts build`
-- `frontend/package.json`
-  - `dev`: `vite`
-  - `build`: `vite build`
-  - `preview`: `vite preview`
+## 🧾 Highlights
 
-### Troubleshooting
-- Ensure MongoDB is reachable at `MONGO_URL`.
-- For Razorpay, use test keys and test mode; verify the API can reach Razorpay and that the webhook/callback URLs are correct if used.
-- If the dashboard shows CORS issues, confirm the backend enables CORS and that origins match your dev hosts.
-- If you see React StrictMode double‑mount side effects, ensure any DOM manipulations add/remove nodes safely and that portals target stable containers.
+* Developed a **real-time stock trading simulation platform** using the **MERN stack**.
+* Integrated **Finnhub API** for live stock market data and **Socket.IO** for realtime synchronization.
+* Implemented **Google OAuth** for authentication and **Razorpay** for wallet management.
+* Enabled **CSV export** for transaction history and **interactive charting** for 15-day stock visualization.
 
-### License
-ISC — see `package.json` in `backend`.
+---
+
+## 🧩 Troubleshooting
+
+* Ensure MongoDB instance is running and reachable.
+* Verify Razorpay test keys for wallet flows.
+* Fix CORS issues by aligning `localhost` ports in frontend and backend.
+* Use `nodemon` for backend development for hot reloading.
+
+---
+
+## 📜 License
+
+Licensed under the **ISC License** — see `package.json` in `/backend`.
+
+---
