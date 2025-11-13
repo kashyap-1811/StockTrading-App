@@ -33,9 +33,9 @@
   padding-bottom: 2rem;
 }
 
-.hero-subtitle {
-  color: #0d0227;
-  font-size: 14px;
+.subtitle {
+  color: black;
+  font-size: 1.25rem;
   margin-bottom: 2rem;
   line-height: 1.6;
 }

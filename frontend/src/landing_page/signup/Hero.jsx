@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowRight, Github, User, LogIn } from "lucide-react"
+import { ArrowRight, User, LogIn } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./Hero.css"
 
@@ -129,7 +129,7 @@ const handleSubmit = async (e) => {
                   ? "Open a free demat and trading account online"
                   : "Login to your account"}
               </h1>
-              <p className="hero-subtitle">
+              <p className="subtitle">
                 {mode === "signup"
                   ? "Start investing brokerage free and join a community of 1.6+ crore investors and traders"
                   : "Access your portfolio and continue trading instantly"}
