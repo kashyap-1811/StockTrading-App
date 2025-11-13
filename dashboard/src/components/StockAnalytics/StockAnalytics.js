@@ -63,13 +63,34 @@ const StockAnalytics = () => {
     const canvas = document.getElementById('priceChart');
     if (!canvas) return;
 
+    // Get container dimensions for responsive sizing
+    const container = canvas.parentElement;
+    const containerWidth = container.clientWidth - 40; // Account for padding
+    const containerHeight = Math.max(300, Math.min(400, containerWidth * 0.5)); // Responsive height with min/max
+    
+    // Handle high DPI displays
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = containerWidth;
+    const displayHeight = containerHeight;
+    
+    // Set canvas dimensions (actual pixel size - scaled for DPR)
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    
+    // Set CSS size for display (logical pixels)
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+    
+    // Scale context for high DPI
     const ctx = canvas.getContext('2d');
-    const padding = 60;
-    const chartWidth = canvas.width - 2 * padding;
-    const chartHeight = canvas.height - 2 * padding;
+    ctx.scale(dpr, dpr);
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const padding = Math.max(40, Math.min(60, displayWidth * 0.075)); // Responsive padding
+    const chartWidth = displayWidth - 2 * padding;
+    const chartHeight = displayHeight - 2 * padding;
+
+    // Clear canvas (use display dimensions after scaling)
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
 
     // Find min and max prices
     const prices = chartData.map(d => d.price);
@@ -78,11 +99,11 @@ const StockAnalytics = () => {
     const priceRange = maxPrice - minPrice;
 
     // Draw background gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const gradient = ctx.createLinearGradient(0, 0, 0, displayHeight);
     gradient.addColorStop(0, analyticsData.isGain ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)');
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, displayWidth, displayHeight);
 
     // Draw grid lines
     ctx.strokeStyle = '#e5e7eb';
@@ -93,7 +114,7 @@ const StockAnalytics = () => {
       const y = padding + (chartHeight / 5) * i;
       ctx.beginPath();
       ctx.moveTo(padding, y);
-      ctx.lineTo(canvas.width - padding, y);
+      ctx.lineTo(displayWidth - padding, y);
       ctx.stroke();
     }
 
@@ -102,7 +123,7 @@ const StockAnalytics = () => {
       const x = padding + (chartWidth / 4) * i;
       ctx.beginPath();
       ctx.moveTo(x, padding);
-      ctx.lineTo(x, canvas.height - padding);
+      ctx.lineTo(x, displayHeight - padding);
       ctx.stroke();
     }
 
@@ -113,7 +134,7 @@ const StockAnalytics = () => {
 
     chartData.forEach((point, index) => {
       const x = padding + (chartWidth / (chartData.length - 1)) * index;
-      const y = canvas.height - padding - ((point.price - minPrice) / priceRange) * chartHeight;
+      const y = displayHeight - padding - ((point.price - minPrice) / priceRange) * chartHeight;
       
       if (index === 0) {
         ctx.moveTo(x, y);
@@ -128,7 +149,7 @@ const StockAnalytics = () => {
     ctx.fillStyle = analyticsData.isGain ? '#10B981' : '#EF4444';
     chartData.forEach((point, index) => {
       const x = padding + (chartWidth / (chartData.length - 1)) * index;
-      const y = canvas.height - padding - ((point.price - minPrice) / priceRange) * chartHeight;
+      const y = displayHeight - padding - ((point.price - minPrice) / priceRange) * chartHeight;
       
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
@@ -142,7 +163,8 @@ const StockAnalytics = () => {
 
     // Draw Y-axis labels
     ctx.fillStyle = '#6b7280';
-    ctx.font = '12px Inter, sans-serif';
+    const fontSize = Math.max(10, Math.min(12, displayWidth * 0.015)); // Responsive font size
+    ctx.font = `${fontSize}px Inter, sans-serif`;
     ctx.textAlign = 'right';
     
     for (let i = 0; i <= 5; i++) {
@@ -154,21 +176,35 @@ const StockAnalytics = () => {
     // Draw X-axis labels (dates)
     ctx.textAlign = 'center';
     ctx.fillStyle = '#6b7280';
-    ctx.font = '11px Inter, sans-serif';
+    const xAxisFontSize = Math.max(9, Math.min(11, displayWidth * 0.014)); // Responsive font size
+    ctx.font = `${xAxisFontSize}px Inter, sans-serif`;
     
-    // Show x-axis labels for 15 days - show every 3rd day for better readability
+    // Show x-axis labels - adjust frequency based on container width
+    const labelInterval = displayWidth < 600 ? 4 : 3; // Show fewer labels on smaller screens
     chartData.forEach((point, index) => {
-      if (index % 3 === 0 || index === chartData.length - 1) {
+      if (index % labelInterval === 0 || index === chartData.length - 1) {
         const x = padding + (chartWidth / (chartData.length - 1)) * index;
         const date = formatDate(point.date);
-        ctx.fillText(date, x, canvas.height - padding + 20);
+        ctx.fillText(date, x, displayHeight - padding + 20);
       }
     });
   };
 
   useEffect(() => {
     if (analyticsData) {
+      // Initial draw
       setTimeout(drawChart, 100);
+      
+      // Handle window resize
+      const handleResize = () => {
+        setTimeout(drawChart, 100);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
     }
   }, [analyticsData]);
 
@@ -258,7 +294,7 @@ const StockAnalytics = () => {
       {/* Chart */}
       <div className="chart-container">
         <div className="chart-wrapper">
-          <canvas id="priceChart" width="800" height="400"></canvas>
+          <canvas id="priceChart"></canvas>
         </div>
       </div>
 

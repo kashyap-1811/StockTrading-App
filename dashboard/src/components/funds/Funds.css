@@ -42,9 +42,10 @@
 /* Summary Cards - matching Holdings */
 .summary-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+  max-width: 100%;
 }
 
 .summary-card {
@@ -57,6 +58,11 @@
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  min-width: 0; /* Prevents grid overflow */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .summary-card::before {
@@ -79,6 +85,8 @@
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.2;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .summary-card p {
@@ -88,6 +96,8 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .loading-text {
@@ -384,10 +394,53 @@
 }
 
 /* Responsive Design */
+@media (min-width: 1400px) {
+  .summary-row {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .summary-card {
+    padding: 2.5rem;
+  }
+  
+  .summary-card h5 {
+    font-size: 2.25rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .summary-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .summary-card {
+    padding: 1.75rem;
+  }
+  
+  .summary-card h5 {
+    font-size: 1.75rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .summary-row {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+  }
+  
+  .summary-card {
+    padding: 1.5rem;
+  }
+  
+  .summary-card h5 {
+    font-size: 1.75rem;
+  }
+  
+  .summary-card p {
+    font-size: 0.9rem;
   }
   
   .funds-actions {
@@ -395,7 +448,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .summary-row {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -403,6 +456,15 @@
   
   .summary-card {
     padding: 1.5rem;
+    max-width: 100%;
+  }
+  
+  .summary-card h5 {
+    font-size: 1.75rem;
+  }
+  
+  .summary-card p {
+    font-size: 0.9rem;
   }
   
   .funds-actions {
@@ -445,8 +507,23 @@
     font-size: 1.5rem;
   }
   
+  .summary-row {
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .summary-card {
+    padding: 1.25rem;
+  }
+  
   .summary-card h5 {
     font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .summary-card p {
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
   }
   
   .order-table table {
@@ -461,6 +538,20 @@
   .transaction-type {
     font-size: 0.7rem;
     padding: 3px 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .summary-card {
+    padding: 1rem;
+  }
+  
+  .summary-card h5 {
+    font-size: 1.35rem;
+  }
+  
+  .summary-card p {
+    font-size: 0.8rem;
   }
 }
 

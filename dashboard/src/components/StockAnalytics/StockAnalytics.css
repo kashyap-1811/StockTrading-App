@@ -4,6 +4,15 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 2rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.stock-analytics-container > * {
+  margin-bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Header Styles */
@@ -60,6 +69,8 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .summary-card {
@@ -71,6 +82,10 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 .summary-card:hover {
@@ -132,6 +147,12 @@
 /* Chart Container */
 .chart-container {
   margin-bottom: 2rem;
+  margin-top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  clear: both;
+  position: relative;
+  z-index: 1;
 }
 
 .chart-header {
@@ -182,6 +203,18 @@
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: 1px solid #E5E7EB;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.chart-wrapper canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  display: block;
 }
 
 /* Price Table */
@@ -191,6 +224,13 @@
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0;
+  margin-bottom: 0;
+  clear: both;
+  position: relative;
+  z-index: 1;
 }
 
 .price-table-container h3 {
@@ -274,18 +314,38 @@
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #E5E7EB;
+  width: 56px;
+  height: 56px;
+  border: 4px solid #e5e7eb;
   border-top: 4px solid #3B82F6;
+  border-right: 4px solid #2563eb;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  animation: spin 0.75s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  margin-bottom: 24px;
+  display: inline-block;
+  position: relative;
+}
+
+.loading-spinner::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #3B82F6;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% { 
+    transform: rotate(0deg);
+  }
+  100% { 
+    transform: rotate(360deg);
+  }
 }
 
 .error-icon {
@@ -324,6 +384,16 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .chart-wrapper {
+    padding: 15px;
+  }
+  
+  .chart-wrapper canvas {
+    min-height: 300px;
+  }
+}
+
 @media (max-width: 768px) {
   .stock-analytics-container {
     padding: 15px;
@@ -333,6 +403,8 @@
     flex-direction: column;
     text-align: center;
     gap: 15px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem !important;
   }
   
   .back-btn {
@@ -342,6 +414,40 @@
   
   .summary-cards {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 3rem !important;
+    margin-top: 0 !important;
+  }
+  
+  .summary-card {
+    width: 100%;
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .summary-card:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  .chart-container {
+    margin-bottom: 3rem !important;
+    margin-top: 0 !important;
+    width: 100%;
+    clear: both;
+    padding-top: 0;
+  }
+  
+  .chart-wrapper {
+    padding: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  
+  .chart-wrapper canvas {
+    min-height: 250px;
+    width: 100% !important;
+    max-width: 100%;
   }
   
   .chart-header {
@@ -350,9 +456,18 @@
     text-align: center;
   }
   
+  .price-table-container {
+    padding: 1.5rem;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: 100%;
+    clear: both;
+  }
+  
   .table-header, .table-row {
     grid-template-columns: 1fr;
     gap: 10px;
+    text-align: center;
   }
   
   .table-header span, .table-row span {
@@ -361,19 +476,112 @@
 }
 
 @media (max-width: 480px) {
-  .stock-name {
-    font-size: 24px;
+  .stock-analytics-container {
+    padding: 12px;
+  }
+  
+  .analytics-stock-name {
+    font-size: 20px;
+  }
+  
+  .analytics-header {
+    padding: 1rem;
+    margin-bottom: 1rem !important;
+  }
+  
+  .summary-cards {
+    gap: 0.75rem;
+    margin-bottom: 2.5rem !important;
+    margin-top: 0 !important;
   }
   
   .summary-card {
-    padding: 20px;
+    padding: 1rem;
+    width: 100%;
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .summary-card:last-child {
+    margin-bottom: 0 !important;
   }
   
   .card-content .price {
     font-size: 20px;
   }
   
-  .chart-container, .price-table-container {
-    padding: 20px;
+  .chart-container {
+    margin-bottom: 2.5rem !important;
+    margin-top: 0 !important;
+    width: 100%;
+    clear: both;
+    padding-top: 0;
+  }
+  
+  .chart-wrapper {
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  
+  .chart-wrapper canvas {
+    min-height: 200px;
+    width: 100% !important;
+    max-width: 100%;
+  }
+  
+  .price-table-container {
+    padding: 1rem;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: 100%;
+    clear: both;
+  }
+  
+  .price-table-container h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .table-header, .table-row {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .stock-analytics-container {
+    padding: 10px;
+  }
+  
+  .analytics-header {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .summary-cards {
+    gap: 0.5rem;
+    margin-bottom: 2rem !important;
+    margin-top: 0 !important;
+  }
+  
+  .summary-card {
+    padding: 0.75rem;
+    margin: 0 !important;
+  }
+  
+  .chart-container {
+    margin-bottom: 2rem !important;
+    margin-top: 0 !important;
+  }
+  
+  .chart-wrapper {
+    padding: 10px;
+  }
+  
+  .price-table-container {
+    padding: 0.75rem;
+    margin-top: 0 !important;
   }
 }
