@@ -41,6 +41,20 @@ router.get('/price/:symbol', async (req, res) => {
   }
 });
 
+// Get index data (Nifty, Sensex) using Yahoo Finance
+router.get('/index/:symbol', async (req, res) => {
+  try {
+    let { symbol } = req.params;
+    // Decode URL-encoded symbols (e.g., %5E becomes ^)
+    symbol = decodeURIComponent(symbol);
+    const indexData = await stockService.getIndexPrice(symbol);
+    res.json({ success: true, data: indexData });
+  } catch (error) {
+    console.error('Error fetching index data:', error);
+    res.status(500).json({ error: 'Unable to fetch index data' });
+  }
+});
+
 // Get last 15 days data for analytics
 router.get('/analytics/:symbol', async (req, res) => {
   try {

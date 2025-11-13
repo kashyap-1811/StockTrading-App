@@ -231,10 +231,14 @@ class StockService {
                 if (response.data && response.data.c !== 0) {
                     const data = response.data;
                     const currentPrice = data.c;
+                    const previousClose = data.pc || data.c;
+                    const changePercent = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
 
                     return {
                         symbol: symbol,
-                        price: currentPrice
+                        price: currentPrice,
+                        changePercent: data.dp || changePercent,
+                        change: data.d || (currentPrice - previousClose)
                     };
                 } else {
                     throw new Error(`Invalid response data for ${symbol}`);
@@ -258,6 +262,103 @@ class StockService {
         }
     }
 
+    // Get index data (Nifty, Sensex) using Yahoo Finance API
+    async getIndexPrice(symbol) {
+        // Clean expired cache entries
+        this.cleanExpiredCache();
+        
+        // Check cache first
+        const cacheKey = `index_${symbol}`;
+        const cachedData = this.cache.get(cacheKey);
+        
+        if (cachedData && this.isCacheValid(cachedData.timestamp)) {
+            return cachedData.data;
+        }
+
+        try {
+            // Use Yahoo Finance API for indices
+            // Request 5 days of data to ensure we have previous close price
+            const response = await this.retryApiCall(async () => {
+                return await axios.get(`${this.yahooBaseUrl}/${symbol}`, {
+                    params: {
+                        interval: '1d',
+                        range: '5d'
+                    },
+                    timeout: 10000
+                });
+            });
+
+            if (response.data && response.data.chart && response.data.chart.result && response.data.chart.result[0]) {
+                const result = response.data.chart.result[0];
+                const meta = result.meta;
+                
+                if (meta && meta.regularMarketPrice) {
+                    const currentPrice = meta.regularMarketPrice;
+                    
+                    // Use Yahoo Finance's built-in change fields if available
+                    let change = meta.regularMarketChange;
+                    let changePercent = meta.regularMarketChangePercent;
+                    
+                    // If change fields are not available, calculate from previousClose
+                    if (change === undefined || changePercent === undefined || change === null || changePercent === null) {
+                        let previousClose = meta.previousClose;
+                        
+                        // If previousClose is not available in meta, try to get from chart data
+                        if (!previousClose || previousClose === currentPrice) {
+                            const timestamps = result.timestamp;
+                            const quotes = result.indicators.quote[0];
+                            if (timestamps && timestamps.length > 1 && quotes && quotes.close) {
+                                // Get the last valid close price (excluding current price)
+                                const closePrices = quotes.close;
+                                for (let i = closePrices.length - 2; i >= 0; i--) {
+                                    if (closePrices[i] !== null && closePrices[i] !== undefined && closePrices[i] !== 0) {
+                                        previousClose = closePrices[i];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Calculate change if we have previousClose
+                        if (previousClose && previousClose !== currentPrice && previousClose > 0) {
+                            change = currentPrice - previousClose;
+                            changePercent = (change / previousClose) * 100;
+                        }
+                    }
+                    
+                    // Ensure we have valid values (not NaN or undefined)
+                    if (change === undefined || isNaN(change)) change = 0;
+                    if (changePercent === undefined || isNaN(changePercent)) changePercent = 0;
+
+                    const indexData = {
+                        symbol: symbol,
+                        price: currentPrice,
+                        changePercent: changePercent,
+                        change: change
+                    };
+
+                    // Cache the result
+                    this.cache.set(cacheKey, {
+                        data: indexData,
+                        timestamp: Date.now()
+                    });
+
+                    return indexData;
+                } else {
+                    throw new Error(`Invalid response data for ${symbol}`);
+                }
+            } else {
+                throw new Error(`Invalid response data for ${symbol}`);
+            }
+        } catch (error) {
+            // Return cached data if available, even if expired
+            if (cachedData) {
+                return cachedData.data;
+            }
+            
+            throw error;
+        }
+    }
 
     // Get multiple stock prices with rate limiting
     async getMultipleStockPrices(symbols) {

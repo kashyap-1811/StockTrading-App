@@ -964,11 +964,13 @@ hr {
   flex: 0 0 32%;
   min-height: 100%;
   padding: 10px 20px;
-  border-right: 1px solid rgb(224, 224, 224);
+  border-left: 1px solid rgb(224, 224, 224);
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-around;
+  margin-left: auto;
+  position: relative;
 }
 
 /* Responsive TopBar */
@@ -981,9 +983,10 @@ hr {
   .indices-container {
     flex: 1;
     width: 100%;
-    border-right: none;
+    border-left: none;
     border-bottom: 1px solid rgb(224, 224, 224);
     padding: 12px 16px;
+    margin-left: 0;
   }
 }
 
@@ -1019,19 +1022,82 @@ hr {
   }
 }
 
-.nifty {
+.nifty, .sensex {
   flex-basis: 40%;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  z-index: -2;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
-.sensex {
-  flex-basis: 40%;
+.nifty:hover, .sensex:hover {
+  background-color: rgb(249, 250, 251);
+}
+
+.nifty.selected, .sensex.selected {
+  background-color: rgb(239, 246, 255);
+  border: 1px solid rgb(191, 219, 254);
+}
+
+.index-detail-popup {
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  margin-top: 10px;
+  background: white;
+  border: 1px solid rgb(224, 224, 224);
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  min-width: 250px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.index-detail-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgb(31, 41, 55);
+  border-bottom: 1px solid rgb(229, 231, 235);
+  padding-bottom: 8px;
+}
+
+.detail-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: space-evenly;
+  margin-bottom: 10px;
+  padding: 6px 0;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: rgb(107, 114, 128);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .nifty > *,
@@ -1060,7 +1126,7 @@ hr {
 }
 
 /* sudo selectors */
-.index:hover {
+.nifty, .sensex {
   cursor: pointer;
 }
 
