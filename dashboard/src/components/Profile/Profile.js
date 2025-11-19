@@ -85,7 +85,6 @@ const Profile = () => {
       <div className="profile-container">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading your profile...</p>
         </div>
       </div>
     );

@@ -8,7 +8,7 @@ const SearchBar = ({ searchQuery, onSearchChange, resultCount, isShowingSearchRe
         type="text"
         name="search"
         id="search"
-        placeholder="Search eg: Reliance, TCS, HDFC Bank"
+        placeholder="Search eg: Apple/AAPL"
         className="search"
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}

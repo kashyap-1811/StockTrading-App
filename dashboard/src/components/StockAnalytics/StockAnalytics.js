@@ -212,8 +212,9 @@ const StockAnalytics = () => {
     return (
       <div className="stock-analytics-container">
         <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading analytics data...</p>
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
         </div>
       </div>
     );
