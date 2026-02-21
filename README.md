@@ -117,7 +117,7 @@ Public marketing website:
 
 ### **4. Market Data**
 
-* `stockService.js` fetches live prices via Finnhub API and historical data from Alpha Vantage.
+* `stockService.js` fetches live prices via Finnhub API and historical data from Yahoo Finance.
 * Price ticks are emitted over Socket.IO for live dashboard updates.
 
 ---
@@ -159,15 +159,22 @@ StockTrading-App-main/
 
 ### **.env Configuration**
 
-Located at `backend/.env`:
+**`backend/.env`** (copy from `backend/env.example`):
 
 ```env
 MONGO_URL=mongodb://localhost:27017/stocktrading
 PORT=8000
+BACKEND_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:5173
+DASHBOARD_URL=http://localhost:3000
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 
 JWT_SECRET=replace-with-strong-secret
 JWT_EXPIRES_IN=1d
+
 SESSION_SECRET=replace-with-strong-session-secret
+
+FINNHUB_API_KEY=your-finnhub-api-key
 
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
@@ -175,8 +182,29 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 KEY_ID=rzp_test_xxxxxxxxxxxx
 KEY_SECRET=your_razorpay_secret
 
-FINNHUB_API_KEY=your-finnhub-api
-ALPHA_VANTAGE_API_KEY=your-alpha-vantage-api
+NODE_ENV=development
+```
+
+**`frontend/.env`** (copy from `frontend/.env.example`):
+
+```env
+VITE_APP_MODE=local
+VITE_BACKEND_URL_LOCAL=http://localhost:8000
+VITE_BACKEND_URL_DEPLOYED=https://your-backend-domain.example
+VITE_DASHBOARD_URL_LOCAL=http://localhost:3000
+VITE_DASHBOARD_URL_DEPLOYED=https://your-dashboard-domain.example
+VITE_FRONTEND_URL_LOCAL=http://localhost:5173
+VITE_FRONTEND_URL_DEPLOYED=https://your-frontend-domain.example
+```
+
+**`dashboard/.env`** (copy from `dashboard/.env.example`):
+
+```env
+REACT_APP_APP_MODE=local
+REACT_APP_BACKEND_URL_LOCAL=http://localhost:8000
+REACT_APP_BACKEND_URL_DEPLOYED=https://your-backend-domain.example
+REACT_APP_FRONTEND_URL_LOCAL=http://localhost:5173
+REACT_APP_FRONTEND_URL_DEPLOYED=https://your-frontend-domain.example
 ```
 
 ---
