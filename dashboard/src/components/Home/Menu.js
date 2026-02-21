@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from '../../config/api';
 
 const Menu = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -21,7 +22,7 @@ const Menu = () => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
+          const res = await axios.get(`${API_BASE_URL}/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(res.data);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Dashboard from "../Dashboard";
 import TopBar from "./TopBar";
 import { StockProvider } from "../../contexts/StockContext";
+import { API_BASE_URL } from '../../config/api';
 
 const Home = () => {
   const [isValid, setIsValid] = useState(null); // null = loading, true/false = checked
@@ -26,7 +27,7 @@ const Home = () => {
 
       try {
         // 3. Verify token with backend
-        const res = await fetch("https://stocktrading-app-lp0z.onrender.com/verify", {
+        const res = await fetch(`${API_BASE_URL}/verify`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

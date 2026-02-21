@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
+import { API_BASE_URL } from '../config/api';
 
 const StockContext = createContext();
 
@@ -38,7 +39,7 @@ export const StockProvider = ({ children }) => {
       socketRef.current.disconnect();
     }
 
-    socketRef.current = io('https://stocktrading-app-lp0z.onrender.com', {
+    socketRef.current = io(`${API_BASE_URL}`, {
       transports: ['polling', 'websocket'],
       timeout: 30000,
       reconnection: true,
@@ -112,7 +113,7 @@ export const StockProvider = ({ children }) => {
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://stocktrading-app-lp0z.onrender.com/stocks/companies');
+      const response = await axios.get(`${API_BASE_URL}/stocks/companies`);
       if (response.data.success) {
         setCompanies(response.data.data);
         setLastUpdated(new Date());
@@ -132,7 +133,7 @@ export const StockProvider = ({ children }) => {
     }
     
     try {
-      const response = await axios.get(`https://stocktrading-app-lp0z.onrender.com/stocks/search?q=${encodeURIComponent(query)}`);
+      const response = await axios.get(`${API_BASE_URL}/stocks/search?q=${encodeURIComponent(query)}`);
       if (response.data.success) {
         return response.data.data;
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
+import { API_BASE_URL } from '../../config/api';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -61,7 +62,7 @@ const Summary = () => {
     const token = localStorage.getItem("token");
     try {
       setLoading(true);
-      const rawHoldings = await axios.get("https://stocktrading-app-lp0z.onrender.com/holdings", {
+      const rawHoldings = await axios.get(`${API_BASE_URL}/holdings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

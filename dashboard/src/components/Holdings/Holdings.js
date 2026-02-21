@@ -4,6 +4,7 @@ import axios from "axios";
 import { useStockContext } from "../../contexts/StockContext";
 import SellModal from "./SellModal";
 import "./Holdings.css";
+import { API_BASE_URL } from '../../config/api';
 
 const Holdings = () => {
   const [holdings, setHoldings] = useState([]);
@@ -31,7 +32,7 @@ const Holdings = () => {
   const fetchHoldings = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get("https://stocktrading-app-lp0z.onrender.com/holdings", {
+      const response = await axios.get(`${API_BASE_URL}/holdings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setHoldings(response.data);
@@ -45,7 +46,7 @@ const Holdings = () => {
   const loadWallet = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
+      const res = await axios.get(`${API_BASE_URL}/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWalletPoints(res.data?.points || 0);

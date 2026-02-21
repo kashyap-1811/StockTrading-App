@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useStockContext } from '../../contexts/StockContext';
 import './BuyModal.css';
+import { API_BASE_URL } from '../../config/api';
 
 const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess }) => {
   const [quantity, setQuantity] = useState(1);
@@ -63,7 +64,7 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "https://stocktrading-app-lp0z.onrender.com/buy",
+        `${API_BASE_URL}/buy`,
         { 
           symbol: uid, 
           name: companyName || uid, 

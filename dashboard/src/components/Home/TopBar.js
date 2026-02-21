@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Menu from "./Menu";
+import { API_BASE_URL } from '../../config/api';
 
 const TopBar = () => {
   const [niftyData, setNiftyData] = useState(null);
@@ -13,7 +14,7 @@ const TopBar = () => {
       // Fetch Nifty 50 data using Yahoo Finance API (^NSEI)
       try {
         const niftySymbol = encodeURIComponent("^NSEI");
-        const niftyResponse = await axios.get(`https://stocktrading-app-lp0z.onrender.com/stocks/index/${niftySymbol}`);
+        const niftyResponse = await axios.get(`${API_BASE_URL}/stocks/index/${niftySymbol}`);
         if (niftyResponse.data.success && niftyResponse.data.data && niftyResponse.data.data.price) {
           setNiftyData(niftyResponse.data.data);
         }
@@ -21,7 +22,7 @@ const TopBar = () => {
         console.error("Error fetching Nifty data:", niftyError);
         // Try alternative symbol without ^
         try {
-          const altResponse = await axios.get("https://stocktrading-app-lp0z.onrender.com/stocks/index/NSEI");
+          const altResponse = await axios.get(`${API_BASE_URL}/stocks/index/NSEI`);
           if (altResponse.data.success && altResponse.data.data && altResponse.data.data.price) {
             setNiftyData(altResponse.data.data);
           }
@@ -33,7 +34,7 @@ const TopBar = () => {
       // Fetch Sensex data using Yahoo Finance API (^BSESN)
       try {
         const sensexSymbol = encodeURIComponent("^BSESN");
-        const sensexResponse = await axios.get(`https://stocktrading-app-lp0z.onrender.com/stocks/index/${sensexSymbol}`);
+        const sensexResponse = await axios.get(`${API_BASE_URL}/stocks/index/${sensexSymbol}`);
         if (sensexResponse.data.success && sensexResponse.data.data && sensexResponse.data.data.price) {
           setSensexData(sensexResponse.data.data);
         }
@@ -41,7 +42,7 @@ const TopBar = () => {
         console.error("Error fetching Sensex data:", sensexError);
         // Try alternative symbol without ^
         try {
-          const altResponse = await axios.get("https://stocktrading-app-lp0z.onrender.com/stocks/index/BSESN");
+          const altResponse = await axios.get(`${API_BASE_URL}/stocks/index/BSESN`);
           if (altResponse.data.success && altResponse.data.data && altResponse.data.data.price) {
             setSensexData(altResponse.data.data);
           }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './StockAnalytics.css';
+import { API_BASE_URL } from '../../config/api';
 
 const StockAnalytics = () => {
   const { stockName } = useParams();
@@ -19,7 +20,7 @@ const StockAnalytics = () => {
     setError(null);
     
     try {
-      const response = await axios.get(`https://stocktrading-app-lp0z.onrender.com/stocks/analytics/${stockName}`);
+      const response = await axios.get(`${API_BASE_URL}/stocks/analytics/${stockName}`);
       
       if (response.data.success) {
         console.log('Analytics data received:', response.data.data);

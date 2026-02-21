@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Profile.css";
+import { API_BASE_URL } from '../../config/api';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -19,7 +20,7 @@ const Profile = () => {
     const load = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
+        const res = await axios.get(`${API_BASE_URL}/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
@@ -56,7 +57,7 @@ const Profile = () => {
     setUpdateLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.put("https://stocktrading-app-lp0z.onrender.com/profile/update", editForm, {
+      const res = await axios.put(`${API_BASE_URL}/profile/update`, editForm, {
         headers: { Authorization: `Bearer ${token}` },
       });
       

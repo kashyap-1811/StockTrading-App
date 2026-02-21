@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BuyModal from './BuyModal';
+import { API_BASE_URL } from '../../config/api';
 
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
 import Tooltip from "@mui/material/Tooltip";
@@ -19,7 +20,7 @@ const WatchListActions = ({ stock, uid, companyName }) => {
   const loadWalletPoints = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
+      const response = await axios.get(`${API_BASE_URL}/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWalletPoints(response.data?.points || 0);

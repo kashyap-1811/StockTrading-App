@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useStockContext } from '../../contexts/StockContext';
 import './SellModal.css';
+import { API_BASE_URL } from '../../config/api';
 
 const SellModal = ({ 
   isOpen, 
@@ -63,7 +64,7 @@ const SellModal = ({
       const proceeds = qty * currentPrice;
       
       await axios.post(
-        "https://stocktrading-app-lp0z.onrender.com/sell",
+        `${API_BASE_URL}/sell`,
         { 
           symbol: selectedHolding.symbol, 
           qty: Number(qty), 
