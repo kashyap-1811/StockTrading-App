@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
             return !this.googleId;
         }
     },
-    phone: { type: String, sparse: true },
+    phone: { type: String, unique: true, sparse: true },
     kycStatus: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
     points: { type: Number, default: 0 }, // Added points field for wallet functionality
     totalPointsAdded: { type: Number, default: 0 }, // Track total points added by user
