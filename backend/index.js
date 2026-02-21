@@ -91,32 +91,46 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       callbackURL: `${backendUrl}/auth/google/callback`
   }, async (accessToken, refreshToken, profile, done) => {
     try {
-        console.log('Google OAuth profile received:', profile);
-        const { id: googleId, emails, displayName, photos } = profile;
-        const email = emails[0].value;
-        const name = displayName;
-        const profilePicture = photos[0]?.value;
+        const googleId = profile?.id;
+        const email = profile?.emails?.[0]?.value?.toLowerCase();
+        const profilePicture = profile?.photos?.[0]?.value;
+        const safeName =
+          (profile?.displayName || "").trim() || (email ? email.split('@')[0] : "");
 
-        console.log('Processing user:', { email, name, googleId });
+        if (!googleId || !email) {
+            return done(new Error('Google profile is missing required account data'), null);
+        }
 
-        // Check if user exists
-        let user = await UsersModel.findOne({ email });
+        // Try to link by Google ID first, then email
+        let user = await UsersModel.findOne({ $or: [{ googleId }, { email }] });
         
         if (user) {
-            console.log('Existing user found:', user.email);
-            // Update existing user with Google ID if not present
+            let shouldSave = false;
+
             if (!user.googleId) {
                 user.googleId = googleId;
-                user.profilePicture = profilePicture;
-                await user.save();
-                console.log('Updated existing user with Google ID');
+                shouldSave = true;
             }
+
+            if (!user.profilePicture && profilePicture) {
+                user.profilePicture = profilePicture;
+                shouldSave = true;
+            }
+
+            if ((!user.name || !user.name.trim()) && safeName) {
+                user.name = safeName;
+                shouldSave = true;
+            }
+
+            if (shouldSave) {
+                await user.save();
+            }
+
             return done(null, user);
         } else {
-            console.log('Creating new user');
             // Create new user
             user = new UsersModel({
-                name,
+                name: safeName,
                 email,
                 googleId,
                 profilePicture,
@@ -125,10 +139,10 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 totalPointsAdded: 0
             });
             await user.save();
-            console.log('New user created:', user.email);
             return done(null, user);
         }
     } catch (error) {
+        console.error('Google OAuth strategy error:', error);
         return done(error, null);
     }
   }));

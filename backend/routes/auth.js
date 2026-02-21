@@ -10,7 +10,7 @@ const getAuthErrorRedirect = (message) =>
   `${frontendUrl}/auth/error?message=${encodeURIComponent(message)}`;
 
 // Google OAuth Routes
-router.get('/google', (req, res) => {
+router.get('/google', (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     return res.status(500).json({ 
       success: false, 
@@ -18,16 +18,26 @@ router.get('/google', (req, res) => {
     });
   }
   passport.authenticate('google', {
-    scope: ['profile', 'email']
-  })(req, res);
+    scope: ['profile', 'email'],
+    prompt: 'select_account',
+    session: false
+  })(req, res, next);
 });
 
 router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: getAuthErrorRedirect('Authentication failed') }),
+  passport.authenticate('google', {
+    failureRedirect: getAuthErrorRedirect('Google sign-in failed'),
+    session: false
+  }),
   async (req, res) => {
     try {
       if (!req.user) {
-        return res.redirect(getAuthErrorRedirect('User not found'));
+        return res.redirect(getAuthErrorRedirect('User not found after Google sign-in'));
+      }
+
+      if (!process.env.JWT_SECRET) {
+        console.error('JWT_SECRET is missing. Unable to issue token.');
+        return res.redirect(getAuthErrorRedirect('Server auth configuration error'));
       }
 
       // Generate JWT token (same as regular login)
@@ -120,6 +130,13 @@ router.post("/login", async (req, res) => {
     const user = await UsersModel.findOne({ email });
     if (!user) {
       return res.status(400).json({ success: false, message: "Email does not Exist" });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: "This account was created with Google. Please continue with Google sign-in."
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
