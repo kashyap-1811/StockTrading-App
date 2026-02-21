@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Dashboard from "../Dashboard";
 import TopBar from "./TopBar";
 import { StockProvider } from "../../contexts/StockContext";
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, FRONTEND_URL } from '../../config/api';
 
 const Home = () => {
   const [isValid, setIsValid] = useState(null); // null = loading, true/false = checked
@@ -21,7 +21,7 @@ const Home = () => {
       // 2. Get token from localStorage
       const token = localStorage.getItem("token");
       if (!token) {
-        window.location.href = "http://localhost:5173/signup";
+        window.location.href = `${FRONTEND_URL}/signup`;
         return;
       }
 
@@ -39,12 +39,12 @@ const Home = () => {
         } else {
           // Token invalid → clear + redirect
           localStorage.removeItem("token");
-          window.location.href = "http://localhost:5173/signup";
+          window.location.href = `${FRONTEND_URL}/signup`;
         }
       } catch (err) {
         console.error("Token verification failed:", err);
         localStorage.removeItem("token");
-        window.location.href = "http://localhost:5173/signup";
+        window.location.href = `${FRONTEND_URL}/signup`;
       }
     };
 

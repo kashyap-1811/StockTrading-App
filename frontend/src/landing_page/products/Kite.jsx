@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { DASHBOARD_URL } from "../../config/appUrls";
 
 function Kite() {
     return (
@@ -28,12 +28,12 @@ function Kite() {
 
                         {/* Links */}
                         <div className="d-flex justify-content-center justify-content-md-start flex-wrap gap-4 mb-3">
-                            <Link
-                                to="https://kite-demo.zerodha.com/dashboard"
+                            <a
+                                href={DASHBOARD_URL}
                                 className="text-decoration-none fw-semibold"
                             >
                                 Try Demo<span className="ms-1">→</span>
-                            </Link>
+                            </a>
 
                             <a
                                 href="https://zerodha.com/products/kite"

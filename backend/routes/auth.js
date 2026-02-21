@@ -4,6 +4,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const UsersModel = require('../models/UsersModel');
+const { frontendUrl, dashboardUrl } = require('../config/appConfig');
+
+const getAuthErrorRedirect = (message) =>
+  `${frontendUrl}/auth/error?message=${encodeURIComponent(message)}`;
 
 // Google OAuth Routes
 router.get('/google', (req, res) => {
@@ -19,11 +23,11 @@ router.get('/google', (req, res) => {
 });
 
 router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: 'http://localhost:3000/auth/error?message=Authentication failed' }),
+  passport.authenticate('google', { failureRedirect: getAuthErrorRedirect('Authentication failed') }),
   async (req, res) => {
     try {
       if (!req.user) {
-        return res.redirect('http://localhost:3000/auth/error?message=User not found');
+        return res.redirect(getAuthErrorRedirect('User not found'));
       }
 
       // Generate JWT token (same as regular login)
@@ -33,18 +37,18 @@ router.get('/google/callback',
         { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
       );
 
-      // Redirect to frontend with token
-      const frontendUrl = `http://localhost:3000/?token=${token}&user=${encodeURIComponent(JSON.stringify({
+      // Redirect to dashboard with token
+      const dashboardRedirectUrl = `${dashboardUrl}/?token=${token}&user=${encodeURIComponent(JSON.stringify({
         id: req.user._id,
         name: req.user.name,
         email: req.user.email,
         profilePicture: req.user.profilePicture
       }))}`;
       
-      res.redirect(frontendUrl);
+      res.redirect(dashboardRedirectUrl);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
-      res.redirect('http://localhost:3000/auth/error?message=Authentication failed');
+      res.redirect(getAuthErrorRedirect('Authentication failed'));
     }
   }
 );

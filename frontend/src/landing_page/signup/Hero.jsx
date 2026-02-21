@@ -2,16 +2,7 @@ import { useState } from "react"
 import { ArrowRight, User, LogIn } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./Hero.css"
-
-const backendMode = import.meta.env.VITE_BACKEND_MODE || "deployed"
-const selectedBackendUrl =
-  (backendMode === "local"
-    ? import.meta.env.VITE_BACKEND_URL_LOCAL
-    : import.meta.env.VITE_BACKEND_URL_DEPLOYED) ||
-  import.meta.env.VITE_BACKEND_URL_DEPLOYED ||
-  import.meta.env.VITE_BACKEND_URL_LOCAL ||
-  "http://localhost:8000"
-const apiBaseUrl = selectedBackendUrl.replace(/\/$/, "")
+import { API_BASE_URL, DASHBOARD_URL } from "../../config/appUrls"
 
 export default function Hero() {
   const [mode, setMode] = useState("login") // "signup" or "login"
@@ -32,8 +23,8 @@ const handleSubmit = async (e) => {
   try {
     const endpoint =
       mode === "signup"
-        ? `${apiBaseUrl}/auth/signup`
-        : `${apiBaseUrl}/auth/login`;
+        ? `${API_BASE_URL}/auth/signup`
+        : `${API_BASE_URL}/auth/login`;
 
     // Only send necessary fields
     const payload =
@@ -71,7 +62,7 @@ const handleSubmit = async (e) => {
           localStorage.setItem("user", JSON.stringify(data.user));
           console.log("Token in localStorage:", data.token);
         }
-        window.location.href = `http://localhost:3000?token=${data.token}`;
+        window.location.href = `${DASHBOARD_URL}/?token=${data.token}`;
       }
     } else {
       setMessage(data.message);
@@ -88,7 +79,7 @@ const handleSubmit = async (e) => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = `${apiBaseUrl}/auth/google`;
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   // Floating particles

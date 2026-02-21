@@ -5,11 +5,12 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const { backendUrl, corsAllowedOrigins, isProduction } = require('./config/appConfig');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: corsAllowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -43,7 +44,7 @@ const session = require('express-session');
 // cors
 const cors = require('cors');
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000"],
+  origin: corsAllowedOrigins,
   credentials: true
 }));
 
@@ -53,7 +54,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: isProduction,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -86,7 +88,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:8000/auth/google/callback"
+      callbackURL: `${backendUrl}/auth/google/callback`
   }, async (accessToken, refreshToken, profile, done) => {
     try {
         console.log('Google OAuth profile received:', profile);

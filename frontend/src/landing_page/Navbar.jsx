@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Menu } from "lucide-react";
 import {Link} from "react-router-dom";
 import "./Navbar.css";
+import { DASHBOARD_URL } from "../config/appUrls";
 
 export default function Navbar() {
     const [showMegaMenu, setShowMegaMenu] = useState(false);
@@ -37,7 +38,7 @@ export default function Navbar() {
                                 {/* Top Section */}
                                 <div className="mega-row">
                                     <div className="mega-column">
-                                    <a href="http://localhost:3000">
+                                    <a href={DASHBOARD_URL}>
                                         <img src="images/kite-logo.svg" alt="Kite" />
                                         <div>Kite</div>
                                         <span>Trading platform</span>
