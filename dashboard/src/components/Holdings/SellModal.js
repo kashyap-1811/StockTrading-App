@@ -63,7 +63,7 @@ const SellModal = ({
       const proceeds = qty * currentPrice;
       
       await axios.post(
-        "http://localhost:8000/sell",
+        "https://stocktrading-app-lp0z.onrender.com/sell",
         { 
           symbol: selectedHolding.symbol, 
           qty: Number(qty), 

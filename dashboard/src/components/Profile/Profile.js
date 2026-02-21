@@ -19,7 +19,7 @@ const Profile = () => {
     const load = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:8000/me", {
+        const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
@@ -56,7 +56,7 @@ const Profile = () => {
     setUpdateLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.put("http://localhost:8000/profile/update", editForm, {
+      const res = await axios.put("https://stocktrading-app-lp0z.onrender.com/profile/update", editForm, {
         headers: { Authorization: `Bearer ${token}` },
       });
       

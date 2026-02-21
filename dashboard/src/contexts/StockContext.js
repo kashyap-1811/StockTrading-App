@@ -38,7 +38,7 @@ export const StockProvider = ({ children }) => {
       socketRef.current.disconnect();
     }
 
-    socketRef.current = io('http://localhost:8000', {
+    socketRef.current = io('https://stocktrading-app-lp0z.onrender.com', {
       transports: ['polling', 'websocket'],
       timeout: 30000,
       reconnection: true,
@@ -112,7 +112,7 @@ export const StockProvider = ({ children }) => {
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/stocks/companies');
+      const response = await axios.get('https://stocktrading-app-lp0z.onrender.com/stocks/companies');
       if (response.data.success) {
         setCompanies(response.data.data);
         setLastUpdated(new Date());
@@ -132,7 +132,7 @@ export const StockProvider = ({ children }) => {
     }
     
     try {
-      const response = await axios.get(`http://localhost:8000/stocks/search?q=${encodeURIComponent(query)}`);
+      const response = await axios.get(`https://stocktrading-app-lp0z.onrender.com/stocks/search?q=${encodeURIComponent(query)}`);
       if (response.data.success) {
         return response.data.data;
       }

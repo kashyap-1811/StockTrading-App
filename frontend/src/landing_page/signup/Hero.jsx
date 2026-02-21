@@ -3,6 +3,16 @@ import { ArrowRight, User, LogIn } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./Hero.css"
 
+const backendMode = import.meta.env.VITE_BACKEND_MODE || "deployed"
+const selectedBackendUrl =
+  (backendMode === "local"
+    ? import.meta.env.VITE_BACKEND_URL_LOCAL
+    : import.meta.env.VITE_BACKEND_URL_DEPLOYED) ||
+  import.meta.env.VITE_BACKEND_URL_DEPLOYED ||
+  import.meta.env.VITE_BACKEND_URL_LOCAL ||
+  "http://localhost:8000"
+const apiBaseUrl = selectedBackendUrl.replace(/\/$/, "")
+
 export default function Hero() {
   const [mode, setMode] = useState("login") // "signup" or "login"
   const [formData, setFormData] = useState({
@@ -22,8 +32,8 @@ const handleSubmit = async (e) => {
   try {
     const endpoint =
       mode === "signup"
-        ? "http://localhost:8000/auth/signup"
-        : "http://localhost:8000/auth/login";
+        ? `${apiBaseUrl}/auth/signup`
+        : `${apiBaseUrl}/auth/login`;
 
     // Only send necessary fields
     const payload =
@@ -78,7 +88,7 @@ const handleSubmit = async (e) => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = 'http://localhost:8000/auth/google';
+    window.location.href = `${apiBaseUrl}/auth/google`;
   };
 
   // Floating particles

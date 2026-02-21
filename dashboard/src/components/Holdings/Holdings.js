@@ -31,7 +31,7 @@ const Holdings = () => {
   const fetchHoldings = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get("http://localhost:8000/holdings", {
+      const response = await axios.get("https://stocktrading-app-lp0z.onrender.com/holdings", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setHoldings(response.data);
@@ -45,7 +45,7 @@ const Holdings = () => {
   const loadWallet = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:8000/me", {
+      const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWalletPoints(res.data?.points || 0);

@@ -19,7 +19,7 @@ const WatchListActions = ({ stock, uid, companyName }) => {
   const loadWalletPoints = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8000/me", {
+      const response = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWalletPoints(response.data?.points || 0);

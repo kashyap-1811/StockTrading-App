@@ -61,7 +61,7 @@ const Summary = () => {
     const token = localStorage.getItem("token");
     try {
       setLoading(true);
-      const rawHoldings = await axios.get("http://localhost:8000/holdings", {
+      const rawHoldings = await axios.get("https://stocktrading-app-lp0z.onrender.com/holdings", {
         headers: { Authorization: `Bearer ${token}` },
       });
 

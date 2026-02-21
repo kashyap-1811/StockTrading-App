@@ -63,7 +63,7 @@ const BuyModal = ({ stock, uid, companyName, walletPoints, onClose, onSuccess })
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:8000/buy",
+        "https://stocktrading-app-lp0z.onrender.com/buy",
         { 
           symbol: uid, 
           name: companyName || uid, 

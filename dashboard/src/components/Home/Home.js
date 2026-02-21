@@ -26,7 +26,7 @@ const Home = () => {
 
       try {
         // 3. Verify token with backend
-        const res = await fetch("http://localhost:8000/verify", {
+        const res = await fetch("https://stocktrading-app-lp0z.onrender.com/verify", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

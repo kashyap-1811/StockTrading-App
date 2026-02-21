@@ -30,7 +30,7 @@ const Funds = () => {
     const load = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:8000/funds", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/funds", { headers: { Authorization: `Bearer ${token}` } });
         setPoints(res.data?.points || 0);
         setTotalAdded(res.data?.totalPointsAdded || 0);
         setHistory(res.data?.history || []);
@@ -39,7 +39,7 @@ const Funds = () => {
 
     const loadRazorpayKey = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/razorpay-key");
+        const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/razorpay-key");
         if (res.data.success) {
           setRazorpayKey(res.data.key);
         }
@@ -65,7 +65,7 @@ const Funds = () => {
 
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:8000/wallet/add/create-order",
+        "https://stocktrading-app-lp0z.onrender.com/wallet/add/create-order",
         { amount: Number(val) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -94,7 +94,7 @@ const Funds = () => {
         handler: async function (response) {
           try {
             // Step 3: Verify payment + Save booking
-            const verifyRes = await axios.post("http://localhost:8000/wallet/add/verify-payment", {
+            const verifyRes = await axios.post("https://stocktrading-app-lp0z.onrender.com/wallet/add/verify-payment", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
@@ -106,7 +106,7 @@ const Funds = () => {
             if (verifyRes.data.success) {
               alert("Funds added successfully!");
               // Refresh funds data
-              const fres = await axios.get("http://localhost:8000/funds", { headers: { Authorization: `Bearer ${token}` } });
+              const fres = await axios.get("https://stocktrading-app-lp0z.onrender.com/funds", { headers: { Authorization: `Bearer ${token}` } });
               setPoints(fres.data?.points || 0);
               setTotalAdded(fres.data?.totalPointsAdded || 0);
               setHistory(fres.data?.history || []);
@@ -155,12 +155,12 @@ const Funds = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:8000/wallet/withdraw",
+        "https://stocktrading-app-lp0z.onrender.com/wallet/withdraw",
         { amount: Number(val) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPoints(res.data.points);
-      const fres = await axios.get("http://localhost:8000/funds", { headers: { Authorization: `Bearer ${token}` } });
+      const fres = await axios.get("https://stocktrading-app-lp0z.onrender.com/funds", { headers: { Authorization: `Bearer ${token}` } });
       setTotalAdded(fres.data?.totalPointsAdded || 0);
       setHistory(fres.data?.history || []);
     } catch (e) {
@@ -215,7 +215,7 @@ const Funds = () => {
   const exportCSV = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8000/funds/export-csv", {
+      const response = await axios.get("https://stocktrading-app-lp0z.onrender.com/funds/export-csv", {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob' // Important for file download
       });

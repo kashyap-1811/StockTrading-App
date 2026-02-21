@@ -19,7 +19,7 @@ const StockAnalytics = () => {
     setError(null);
     
     try {
-      const response = await axios.get(`http://localhost:8000/stocks/analytics/${stockName}`);
+      const response = await axios.get(`https://stocktrading-app-lp0z.onrender.com/stocks/analytics/${stockName}`);
       
       if (response.data.success) {
         console.log('Analytics data received:', response.data.data);

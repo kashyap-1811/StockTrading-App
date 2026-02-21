@@ -21,7 +21,7 @@ const Menu = () => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const res = await axios.get("http://localhost:8000/me", {
+          const res = await axios.get("https://stocktrading-app-lp0z.onrender.com/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(res.data);
