@@ -68,11 +68,15 @@ class StockService {
         }
     }
 
-    // Start continuous price updates
     startContinuousUpdates() {
         if (this.updateInterval) {
             return; // Already running
         }
+
+        // Fetch immediately on startup
+        this.getAllCompanies().catch(error => {
+            console.error('Initial stock data fetch failed:', error);
+        });
 
         this.updateInterval = setInterval(async () => {
             if (this.isUpdating) {
@@ -142,33 +146,19 @@ class StockService {
     // Search companies
     async searchCompanies(query) {
         try {
-            const allCompanies = this.get10USCompanies();
+            // Use cached companies if available (even if expired) to keep search instantaneous
+            let allCompanies = this.companiesCache;
+            
+            if (!allCompanies || allCompanies.length === 0) {
+                allCompanies = await this.getAllCompanies();
+            }
+
             const searchResults = allCompanies.filter(company => 
                 company.symbol.toLowerCase().includes(query.toLowerCase()) ||
                 company.name.toLowerCase().includes(query.toLowerCase())
             );
 
-            // Get current prices for search results
-            const symbolsToFetch = searchResults.slice(0, 10).map(company => company.symbol);
-            const stockData = await this.getMultipleStockPrices(symbolsToFetch);
-            
-            return searchResults.slice(0, 10).map((company, index) => {
-                const stockInfo = stockData[index];
-                if (stockInfo && stockInfo.success && stockInfo.data) {
-                    return {
-                        symbol: this.cleanSymbolForDisplay(company.symbol),
-                        name: company.name,
-                        price: stockInfo.data.price,
-                    };
-                } else {
-                    // Return without price if API fails
-                    return {
-                        symbol: this.cleanSymbolForDisplay(company.symbol),
-                        name: company.name,
-                        price: null
-                    };
-                }
-            });
+            return searchResults;
         } catch (error) {
             console.error('Error searching companies:', error);
             return [];

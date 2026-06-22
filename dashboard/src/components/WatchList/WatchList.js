@@ -15,9 +15,15 @@ const WatchList = () => {
 
   // Search functionality with debouncing
   useEffect(() => {
+    if (searchQuery.length >= 2) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+      setSearchResults([]);
+    }
+
     const timeoutId = setTimeout(async () => {
       if (searchQuery.length >= 2) {
-        setIsSearching(true);
         try {
           const results = await searchCompanies(searchQuery);
           setSearchResults(results);
@@ -26,10 +32,8 @@ const WatchList = () => {
         } finally {
           setIsSearching(false);
         }
-      } else {
-        setSearchResults([]);
       }
-    }, 500);
+    }, 200);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, searchCompanies]);
