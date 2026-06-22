@@ -96,6 +96,10 @@ export const StockProvider = ({ children }) => {
 
     socketRef.current.on('stockPricesUpdate', (data) => {
       if (data && data.companies) {
+        if (data.timestamp) {
+          const latency = Date.now() - data.timestamp;
+          console.log(`[WebSocket] Live update received. Propagation latency: ${latency}ms`);
+        }
         setCompanies(data.companies);
         setLastUpdated(new Date());
       }
