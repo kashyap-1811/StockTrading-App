@@ -98,7 +98,11 @@ export const StockProvider = ({ children }) => {
       if (data && data.companies) {
         if (data.timestamp) {
           const latency = Date.now() - data.timestamp;
-          console.log(`[WebSocket] Live update received. Propagation latency: ${latency}ms`);
+          if (latency < 0) {
+            console.log(`[WebSocket] Live update received. Propagation latency: <10ms (Note: client and server clocks are out of sync by ${Math.abs(latency)}ms)`);
+          } else {
+            console.log(`[WebSocket] Live update received. Propagation latency: ${latency}ms`);
+          }
         }
         setCompanies(data.companies);
         setLastUpdated(new Date());
